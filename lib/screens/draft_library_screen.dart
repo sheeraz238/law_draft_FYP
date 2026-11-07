@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/draft_template.dart';
 import '../services/draft_service.dart';
+import '../services/schema_service.dart';
+import 'draft_form_screen.dart';
 
 class DraftLibraryScreen extends StatefulWidget {
   const DraftLibraryScreen({super.key});
@@ -130,9 +132,19 @@ class _CategoryCard extends StatelessWidget {
                 title: Text(d.title),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${d.title} form: Step 5 mein banega'),
+                  final schema = SchemaService.getSchema(d.id);
+                  if (schema == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Is draft ka form jald aayega'),
+                      ),
+                    );
+                    return;
+                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DraftFormScreen(schema: schema),
                     ),
                   );
                 },
