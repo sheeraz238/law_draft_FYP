@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/form_schema.dart';
+import 'package:file_saver/file_saver.dart';
+import '../services/docx_builder.dart';
+import '../services/draft_renderer.dart';
 
 String formatDate(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -170,11 +173,27 @@ class _DynamicFormState extends State<DynamicForm> {
     );
   }
 
-  void _generate() {
+  Future<void> _generate() async {
     if (!_formKey.currentState!.validate()) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('DOCX generation: Step 6 mein banega')),
-    );
+    try {
+      final lines = DraftRenderer.render(widget.schema, _values);
+      final bytes = DocxBuilder.build(lines);
+      await FileSaver.instance.saveFile(
+        name: '${widget.schema.id}_draft',
+        bytes: bytes,
+        fileExtension: 'docx',
+        mimeType: MimeType.microsoftWord,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Draft downloaded')));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not generate file: $e')));
+    }
   }
 
   @override
