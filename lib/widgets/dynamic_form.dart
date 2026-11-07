@@ -3,6 +3,9 @@ import '../models/form_schema.dart';
 import 'package:file_saver/file_saver.dart';
 import '../services/docx_builder.dart';
 import '../services/draft_renderer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/profile_service.dart';
+import '../core/app_config.dart';
 
 String formatDate(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -178,6 +181,9 @@ class _DynamicFormState extends State<DynamicForm> {
     try {
       final lines = DraftRenderer.render(widget.schema, _values);
       final bytes = DocxBuilder.build(lines);
+      final left = AppConfig.enableCredits
+          ? await ProfileService().useDraftCredit()
+          : null;
       await FileSaver.instance.saveFile(
         name: '${widget.schema.id}_draft',
         bytes: bytes,
@@ -185,9 +191,20 @@ class _DynamicFormState extends State<DynamicForm> {
         mimeType: MimeType.microsoftWord,
       );
       if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            left == null
+                ? 'Draft downloaded'
+                : 'Draft downloaded. Credits left: $left',
+          ),
+        ),
+      );
+    } on PostgrestException catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Draft downloaded')));
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(

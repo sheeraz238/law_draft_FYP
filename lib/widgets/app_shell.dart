@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../screens/placeholder_screen.dart';
 import '../screens/draft_library_screen.dart';
 import '../services/auth_service.dart';
+import '../screens/profile_screen.dart';
 
 class NavItem {
   final String title;
@@ -30,12 +31,21 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _index = 0;
 
+  Widget _screenFor(int i) {
+    switch (i) {
+      case 0:
+        return const DraftLibraryScreen();
+      case 5:
+        return const ProfileScreen();
+      default:
+        return PlaceholderScreen(title: navItems[i].title);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.of(context).size.width >= 800;
-    final body = _index == 0
-        ? const DraftLibraryScreen()
-        : PlaceholderScreen(title: navItems[_index].title);
+    final body = _screenFor(_index);
     final appBar = AppBar(
       title: Text(navItems[_index].title),
       actions: [
