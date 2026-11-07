@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/app_theme.dart';
-import 'widgets/app_shell.dart';
+import 'core/supabase_config.dart';
+import 'widgets/auth_gate.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Supabase.initialize(
+    url: SupabaseConfig.url,
+    anonKey: SupabaseConfig.anonKey,
+  );
+  runApp(const MyApp());
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -22,7 +31,7 @@ class _MyAppState extends State<MyApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: _mode,
-      home: AppShell(
+      home: AuthGate(
         onToggleTheme: () => setState(() {
           _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
         }),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/placeholder_screen.dart';
 import '../screens/draft_library_screen.dart';
+import '../services/auth_service.dart';
 
 class NavItem {
   final String title;
@@ -41,6 +42,10 @@ class _AppShellState extends State<AppShell> {
         IconButton(
           icon: const Icon(Icons.brightness_6),
           onPressed: widget.onToggleTheme,
+        ),
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () => AuthService().signOut(),
         ),
       ],
     );
