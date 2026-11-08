@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../screens/profile_screen.dart';
 import '../screens/case_law_screen.dart';
 import '../screens/favorites_screen.dart';
+import '../screens/inheritance_screen.dart';
 
 class NavItem {
   final String title;
@@ -39,6 +40,8 @@ class _AppShellState extends State<AppShell> {
         return const DraftLibraryScreen();
       case 1:
         return const CaseLawScreen();
+              case 3:
+        return const InheritanceScreen();
       case 4:
         return const FavoritesScreen();
       case 5:
