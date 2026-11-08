@@ -3,6 +3,8 @@ import '../screens/placeholder_screen.dart';
 import '../screens/draft_library_screen.dart';
 import '../services/auth_service.dart';
 import '../screens/profile_screen.dart';
+import '../screens/case_law_screen.dart';
+import '../screens/favorites_screen.dart';
 
 class NavItem {
   final String title;
@@ -35,6 +37,10 @@ class _AppShellState extends State<AppShell> {
     switch (i) {
       case 0:
         return const DraftLibraryScreen();
+      case 1:
+        return const CaseLawScreen();
+      case 4:
+        return const FavoritesScreen();
       case 5:
         return const ProfileScreen();
       default:
