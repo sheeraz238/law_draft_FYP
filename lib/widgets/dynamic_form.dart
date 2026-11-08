@@ -6,6 +6,8 @@ import '../services/draft_renderer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/profile_service.dart';
 import '../core/app_config.dart';
+import '../services/draft_history_service.dart';
+
 
 String formatDate(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -190,6 +192,10 @@ class _DynamicFormState extends State<DynamicForm> {
         fileExtension: 'docx',
         mimeType: MimeType.microsoftWord,
       );
+          try {
+        // history save na ho to bhi download kharab na ho
+        await DraftHistoryService().save(widget.schema, _values);
+      } catch (_) {}
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

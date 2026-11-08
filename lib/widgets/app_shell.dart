@@ -8,6 +8,7 @@ import '../screens/favorites_screen.dart';
 import '../screens/inheritance_screen.dart';
 import '../screens/property_tax_screen.dart';
 import '../screens/about_screen.dart';
+import '../screens/history_screen.dart';
 
 class NavItem {
   final String title;
@@ -21,6 +22,7 @@ const navItems = [
   NavItem('Property Tax Calc', Icons.apartment_outlined),
   NavItem('Inheritance Calc', Icons.calculate_outlined),
   NavItem('Favorites', Icons.star_border),
+  NavItem('My Drafts', Icons.history),
   NavItem('Profile', Icons.person_outline),
   NavItem('About', Icons.balance_outlined),
 ];
@@ -42,15 +44,17 @@ class _AppShellState extends State<AppShell> {
         return const DraftLibraryScreen();
       case 1:
         return const CaseLawScreen();
-              case 2:
+      case 2:
         return const PropertyTaxScreen();
-              case 3:
+      case 3:
         return const InheritanceScreen();
       case 4:
         return const FavoritesScreen();
       case 5:
+        return const HistoryScreen();
+      case 6:
         return const ProfileScreen();
-              case 6:
+      case 7:
         return const AboutScreen();
       default:
         return PlaceholderScreen(title: navItems[i].title);
