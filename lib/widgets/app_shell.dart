@@ -7,6 +7,7 @@ import '../screens/case_law_screen.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/inheritance_screen.dart';
 import '../screens/property_tax_screen.dart';
+import '../screens/about_screen.dart';
 
 class NavItem {
   final String title;
@@ -49,6 +50,8 @@ class _AppShellState extends State<AppShell> {
         return const FavoritesScreen();
       case 5:
         return const ProfileScreen();
+              case 6:
+        return const AboutScreen();
       default:
         return PlaceholderScreen(title: navItems[i].title);
     }
