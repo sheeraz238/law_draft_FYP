@@ -6,6 +6,7 @@ import '../screens/profile_screen.dart';
 import '../screens/case_law_screen.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/inheritance_screen.dart';
+import '../screens/property_tax_screen.dart';
 
 class NavItem {
   final String title;
@@ -40,6 +41,8 @@ class _AppShellState extends State<AppShell> {
         return const DraftLibraryScreen();
       case 1:
         return const CaseLawScreen();
+              case 2:
+        return const PropertyTaxScreen();
               case 3:
         return const InheritanceScreen();
       case 4:
