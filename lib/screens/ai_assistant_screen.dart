@@ -44,7 +44,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
       setState(
         () => _error =
             'AI abhi masroof hai ya jawab nahi de saka. Thori der baad dobara koshish karein.',
-      );
+        );
     } finally {
       if (mounted) setState(() => _loading = false);
     }

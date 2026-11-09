@@ -10,6 +10,7 @@ import '../screens/property_tax_screen.dart';
 import '../screens/about_screen.dart';
 import '../screens/history_screen.dart';
 import '../screens/ai_assistant_screen.dart';
+import '../screens/guides_screen.dart';
 
 class NavItem {
   final String title;
@@ -19,6 +20,7 @@ class NavItem {
 
 const navItems = [
   NavItem('Draft Library', Icons.menu_book_outlined),
+  NavItem('Legal Guides', Icons.route_outlined),
   NavItem('AI Assistant', Icons.auto_awesome),
   NavItem('Case Laws', Icons.description_outlined),
   NavItem('Property Tax Calc', Icons.apartment_outlined),
@@ -40,25 +42,27 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _index = 0;
 
-  Widget _screenFor(int i) {
+    Widget _screenFor(int i) {
     switch (i) {
       case 0:
         return const DraftLibraryScreen();
       case 1:
-        return const AiAssistantScreen();
+        return const GuidesScreen();
       case 2:
-        return const CaseLawScreen();
+        return const AiAssistantScreen();
       case 3:
-        return const PropertyTaxScreen();
+        return const CaseLawScreen();
       case 4:
-        return const InheritanceScreen();
+        return const PropertyTaxScreen();
       case 5:
-        return const FavoritesScreen();
+        return const InheritanceScreen();
       case 6:
-        return const HistoryScreen();
+        return const FavoritesScreen();
       case 7:
-        return const ProfileScreen();
+        return const HistoryScreen();
       case 8:
+        return const ProfileScreen();
+      case 9:
         return const AboutScreen();
       default:
         return PlaceholderScreen(title: navItems[i].title);
