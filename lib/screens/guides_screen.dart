@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/legal_guide.dart';
 import '../services/guide_service.dart';
 import 'guide_detail_screen.dart';
+import '../services/local_search.dart';
 
 class GuidesScreen extends StatefulWidget {
   const GuidesScreen({super.key});
@@ -16,6 +17,7 @@ class _GuidesScreenState extends State<GuidesScreen> {
   String _topic = 'All';
   String _query = '';
   bool _loading = true;
+  bool _offline = false;
   String? _error;
 
   @override
@@ -25,17 +27,25 @@ class _GuidesScreenState extends State<GuidesScreen> {
   }
 
   Future<void> _load() async {
+    final cached = await _service.loadCached();
+    if (cached.isNotEmpty && mounted) {
+      setState(() {
+        _all = cached;
+        _loading = false;
+      });
+    }
     try {
       final items = await _service.fetchAll();
       if (!mounted) return;
       setState(() {
         _all = items;
+        _offline = _service.usedCache;
         _loading = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Guides load nahi hue: $e';
+        if (_all.isEmpty) _error = 'Guides load nahi hue: $e';
         _loading = false;
       });
     }
@@ -47,15 +57,21 @@ class _GuidesScreenState extends State<GuidesScreen> {
   ];
 
   List<LegalGuide> get _filtered {
+    final base = _topic == 'All'
+        ? _all
+        : _all.where((g) => g.topic == _topic).toList();
     final q = _query.trim().toLowerCase();
-    return _all.where((g) {
-      final topicOk = _topic == 'All' || g.topic == _topic;
-      final textOk =
-          q.isEmpty ||
-          g.title.toLowerCase().contains(q) ||
-          g.summary.toLowerCase().contains(q);
-      return topicOk && textOk;
-    }).toList();
+    if (q.isEmpty) return base;
+    final ranked = LocalSearch.rank(_query, base).map((m) => m.guide).toList();
+    if (ranked.isNotEmpty) return ranked;
+    // koi qareebi match na mile to purani seedhi talash
+    return base
+        .where(
+          (g) =>
+              g.title.toLowerCase().contains(q) ||
+              g.summary.toLowerCase().contains(q),
+        )
+        .toList();
   }
 
   @override
@@ -78,11 +94,17 @@ class _GuidesScreenState extends State<GuidesScreen> {
               ),
               const SizedBox(height: 4),
               const Text('Step by step guidance on common legal processes'),
+              if (_offline)
+                const Text(
+                  'Offline: showing the saved copy of guides',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
               const SizedBox(height: 16),
               TextField(
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.search),
                   hintText: 'Search guides (e.g. FIR, Khula, bail)...',
+
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (v) => setState(() => _query = v),

@@ -12,6 +12,7 @@ class LegalGuide {
   final List<GuideStep> steps;
   final List<String> documents;
   final List<String> draftIds;
+  final List<String> keywords;
   final String? reviewedBy;
   final DateTime? reviewedOn;
 
@@ -23,6 +24,7 @@ class LegalGuide {
     required this.steps,
     required this.documents,
     required this.draftIds,
+    required this.keywords,
     required this.reviewedBy,
     required this.reviewedOn,
   });
@@ -41,6 +43,7 @@ class LegalGuide {
           .toList(),
       documents: asList(m['documents']).map<String>((e) => '$e').toList(),
       draftIds: asList(m['draft_ids']).map<String>((e) => '$e').toList(),
+      keywords: asList(m['keywords']).map<String>((e) => '$e').toList(),
       reviewedBy: m['reviewed_by'] as String?,
       reviewedOn: m['reviewed_on'] == null
           ? null
