@@ -9,7 +9,7 @@ import '../screens/inheritance_screen.dart';
 import '../screens/property_tax_screen.dart';
 import '../screens/about_screen.dart';
 import '../screens/history_screen.dart';
-import '../screens/ai_assistant_screen.dart';
+import '../screens/ask_ai_screen.dart';
 import '../screens/guides_screen.dart';
 
 class NavItem {
@@ -21,7 +21,7 @@ class NavItem {
 const navItems = [
   NavItem('Draft Library', Icons.menu_book_outlined),
   NavItem('Legal Guides', Icons.route_outlined),
-  NavItem('AI Assistant', Icons.auto_awesome),
+  NavItem('Ask AI', Icons.auto_awesome),
   NavItem('Case Laws', Icons.description_outlined),
   NavItem('Property Tax Calc', Icons.apartment_outlined),
   NavItem('Inheritance Calc', Icons.calculate_outlined),
@@ -42,14 +42,14 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _index = 0;
 
-    Widget _screenFor(int i) {
+  Widget _screenFor(int i) {
     switch (i) {
       case 0:
         return const DraftLibraryScreen();
       case 1:
         return const GuidesScreen();
       case 2:
-        return const AiAssistantScreen();
+        return const AskAiScreen();
       case 3:
         return const CaseLawScreen();
       case 4:
