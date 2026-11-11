@@ -26,6 +26,8 @@ class _Msg {
 
 class AskAiScreen extends StatefulWidget {
   const AskAiScreen({super.key});
+    /// Logout par chat saaf karne ke liye
+  static void clearChat() => _AskAiScreenState._msgs.clear();
 
   @override
   State<AskAiScreen> createState() => _AskAiScreenState();
@@ -36,7 +38,7 @@ class _AskAiScreenState extends State<AskAiScreen> {
   final _guideService = GuideService();
   final _input = TextEditingController();
   final _scroll = ScrollController();
-  final List<_Msg> _msgs = [];
+    static final List<_Msg> _msgs = [];
   List<LegalGuide> _guides = [];
   bool _sending = false;
 
@@ -44,6 +46,7 @@ class _AskAiScreenState extends State<AskAiScreen> {
   void initState() {
     super.initState();
     _loadGuides();
+        _scrollDown();
   }
 
   @override

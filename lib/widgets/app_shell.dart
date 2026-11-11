@@ -41,6 +41,11 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
+  // jo pages pehli baar khul chuke hain (zinda rakhe jayenge)
+  final Set<int> _visited = {0};
+  // jin pages ko har baar taaza data chahiye (Favorites, My Drafts, Profile)
+  bool _isFresh(int i) =>
+      const {'Favorites', 'My Drafts', 'Profile'}.contains(navItems[i].title);
 
   Widget _screenFor(int i) {
     switch (i) {
@@ -72,7 +77,16 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.of(context).size.width >= 800;
-    final body = _screenFor(_index);
+    final body = IndexedStack(
+      index: _index,
+      children: [
+        for (var i = 0; i < navItems.length; i++)
+          if (_isFresh(i))
+            (i == _index ? _screenFor(i) : const SizedBox.shrink())
+          else
+            (_visited.contains(i) ? _screenFor(i) : const SizedBox.shrink()),
+      ],
+    );
     final appBar = AppBar(
       title: Text(navItems[_index].title),
       actions: [
@@ -82,7 +96,10 @@ class _AppShellState extends State<AppShell> {
         ),
         IconButton(
           icon: const Icon(Icons.logout),
-          onPressed: () => AuthService().signOut(),
+          onPressed: () {
+            AskAiScreen.clearChat();
+            AuthService().signOut();
+          },
         ),
       ],
     );
@@ -95,7 +112,10 @@ class _AppShellState extends State<AppShell> {
             NavigationRail(
               extended: true,
               selectedIndex: _index,
-              onDestinationSelected: (i) => setState(() => _index = i),
+              onDestinationSelected: (i) => setState(() {
+                _index = i;
+                _visited.add(i);
+              }),
               destinations: [
                 for (final n in navItems)
                   NavigationRailDestination(
@@ -122,7 +142,10 @@ class _AppShellState extends State<AppShell> {
                 title: Text(navItems[i].title),
                 selected: i == _index,
                 onTap: () {
-                  setState(() => _index = i);
+                  setState(() {
+                    _index = i;
+                    _visited.add(i);
+                  });
                   Navigator.pop(context);
                 },
               ),
