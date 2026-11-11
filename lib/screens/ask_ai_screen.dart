@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/chat_answer.dart';
 import '../models/legal_guide.dart';
 import '../services/chat_service.dart';
 import '../services/guide_service.dart';
+import '../services/local_search.dart';
 import '../services/schema_service.dart';
 import 'draft_form_screen.dart';
 import 'guide_detail_screen.dart';
@@ -10,8 +12,16 @@ import 'guide_detail_screen.dart';
 class _Msg {
   final bool fromUser;
   final String text;
-  final ChatAnswer? answer;
-  const _Msg(this.fromUser, this.text, [this.answer]);
+  final ChatAnswer? answer; // AI ka jawab
+  final List<LegalGuide>? local; // null nahi to ye foran wala local nateeja hai
+  final String? question; // local nateeje ke buttons ke liye
+  const _Msg(
+    this.fromUser,
+    this.text, {
+    this.answer,
+    this.local,
+    this.question,
+  });
 }
 
 class AskAiScreen extends StatefulWidget {
@@ -23,6 +33,7 @@ class AskAiScreen extends StatefulWidget {
 
 class _AskAiScreenState extends State<AskAiScreen> {
   final _chat = ChatService();
+  final _guideService = GuideService();
   final _input = TextEditingController();
   final _scroll = ScrollController();
   final List<_Msg> _msgs = [];
@@ -43,14 +54,18 @@ class _AskAiScreenState extends State<AskAiScreen> {
   }
 
   Future<void> _loadGuides() async {
+    // pehle saved copy (foran), phir internet se taaza
+    final cached = await _guideService.loadCached();
+    if (cached.isNotEmpty && mounted) setState(() => _guides = cached);
     try {
-      final g = await GuideService().fetchAll();
+      final fresh = await _guideService.fetchAll();
       if (!mounted) return;
-      setState(() => _guides = g);
-    } catch (_) {
-      // chips nahi aayenge, chat phir bhi chalegi
-    }
+      setState(() => _guides = fresh);
+    } catch (_) {}
   }
+
+  void _msg(String text) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
   void _scrollDown() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -64,26 +79,39 @@ class _AskAiScreenState extends State<AskAiScreen> {
     });
   }
 
-  Future<void> _send() async {
+  // Darja 1: foran, bina internet ke
+  void _send() {
     final q = _input.text.trim();
-    if (q.isEmpty || _sending) return;
+    if (q.isEmpty) return;
+    final matches = LocalSearch.rank(
+      q,
+      _guides,
+      limit: 3,
+    ).map((m) => m.guide).toList();
     setState(() {
       _msgs.add(_Msg(true, q));
-      _sending = true;
+      _msgs.add(_Msg(false, '', local: matches, question: q));
       _input.clear();
     });
     _scrollDown();
+  }
+
+  // Darja 2: AI (internet), sirf mili hui guides ke saath
+  Future<void> _explain(String q, List<LegalGuide> local) async {
+    if (_sending) return;
+    setState(() => _sending = true);
+    _scrollDown();
     try {
-      final a = await _chat.ask(q);
+      final a = await _chat.ask(q, guideIds: [for (final g in local) g.id]);
       if (!mounted) return;
-      setState(() => _msgs.add(_Msg(false, a.answer, a)));
-    } catch (e) {
+      setState(() => _msgs.add(_Msg(false, a.answer, answer: a)));
+        } catch (e) {
       if (!mounted) return;
       setState(
         () => _msgs.add(
           _Msg(
             false,
-            'AI abhi masroof hai ya jawab nahi de saka. Thori der baad dobara koshish karein.\n\nDetail: $e',
+            'AI abhi masroof hai ya internet nahi hai. Saved guides upar maujood hain, ya thori der baad dobara koshish karein.\n\nDetail: $e',
           ),
         ),
       );
@@ -93,15 +121,25 @@ class _AskAiScreenState extends State<AskAiScreen> {
     _scrollDown();
   }
 
-  void _openGuide(String id) {
-    final matches = _guides.where((g) => g.id == id);
-    if (matches.isEmpty) return;
+  // Darja 3: aapke apne browser mein Google search
+  Future<void> _searchWeb(String q) async {
+    final uri = Uri.https('www.google.com', '/search', {
+      'q': '$q Pakistan law',
+    });
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) _msg('Browser nahi khul saka');
+  }
+
+  void _openGuide(LegalGuide g) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => GuideDetailScreen(guide: matches.first),
-      ),
+      MaterialPageRoute(builder: (_) => GuideDetailScreen(guide: g)),
     );
+  }
+
+  void _openGuideById(String id) {
+    final matches = _guides.where((g) => g.id == id);
+    if (matches.isNotEmpty) _openGuide(matches.first);
   }
 
   void _openDraft(String id) {
@@ -123,10 +161,12 @@ class _AskAiScreenState extends State<AskAiScreen> {
             Text('Ask AI', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             const Text(
-              'Ask about a legal process in English, Urdu or Roman Urdu. '
-              'Answers are based on the guides in this app. General '
-              'information only, not legal advice. Please do not enter real '
-              'names, CNIC or phone numbers, because your text is sent to an AI service.',
+              'Type a question in English, Urdu or Roman Urdu. You first get '
+              'instant results from the guides saved on this device (works '
+              'offline). Then you can ask AI to explain, or search the web '
+              'yourself. General information only, not legal advice. Please '
+              'do not enter real names, CNIC or phone numbers, because the AI '
+              'button sends your text to an AI service.',
             ),
             if (_guides.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -142,7 +182,7 @@ class _AskAiScreenState extends State<AskAiScreen> {
                   for (final g in _guides.take(6))
                     ActionChip(
                       label: Text(g.title),
-                      onPressed: () => _openGuide(g.id),
+                      onPressed: () => _openGuide(g),
                     ),
                 ],
               ),
@@ -153,31 +193,23 @@ class _AskAiScreenState extends State<AskAiScreen> {
     );
   }
 
-  Widget _bubble(_Msg m) {
-    final scheme = Theme.of(context).colorScheme;
-    final a = m.answer;
-
-    if (m.fromUser) {
-      return Align(
-        alignment: Alignment.centerRight,
-        child: Container(
-          margin: const EdgeInsets.only(top: 12),
-          padding: const EdgeInsets.all(12),
-          constraints: const BoxConstraints(maxWidth: 560),
-          decoration: BoxDecoration(
-            color: scheme.primaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: SelectableText(m.text),
+  Widget _userBubble(_Msg m) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        margin: const EdgeInsets.only(top: 12),
+        padding: const EdgeInsets.all(12),
+        constraints: const BoxConstraints(maxWidth: 560),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(12),
         ),
-      );
-    }
+        child: SelectableText(m.text),
+      ),
+    );
+  }
 
-    final drafts = [
-      for (final id in a?.draftIds ?? <String>[])
-        if (SchemaService.getSchema(id) != null) SchemaService.getSchema(id)!,
-    ];
-
+  Widget _botBox(List<Widget> children) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -185,69 +217,166 @@ class _AskAiScreenState extends State<AskAiScreen> {
         padding: const EdgeInsets.all(12),
         constraints: const BoxConstraints(maxWidth: 640),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SelectableText(m.text),
-            if (a != null && !a.grounded) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.info_outline, size: 16),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      'No verified guide covers this. Please consult an advocate.',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            if (a != null && a.guides.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Related guides',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final g in a.guides)
-                    ActionChip(
-                      label: Text(g.title),
-                      onPressed: () => _openGuide(g.id),
-                    ),
-                ],
-              ),
-            ],
-            if (drafts.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Related drafts',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              const SizedBox(height: 4),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final s in drafts)
-                    ActionChip(
-                      avatar: const Icon(Icons.description_outlined, size: 16),
-                      label: Text(s.title),
-                      onPressed: () => _openDraft(s.id),
-                    ),
-                ],
-              ),
-            ],
-          ],
+          children: children,
         ),
       ),
     );
+  }
+
+  Widget _localBubble(_Msg m) {
+    final guides = m.local!;
+    final q = m.question ?? '';
+    final draftIds = <String>{for (final g in guides) ...g.draftIds};
+    final drafts = [
+      for (final id in draftIds)
+        if (SchemaService.getSchema(id) != null) SchemaService.getSchema(id)!,
+    ];
+
+    return _botBox([
+      Row(
+        children: [
+          const Icon(Icons.bolt, size: 16),
+          const SizedBox(width: 4),
+          Text(
+            'Instant, from saved guides',
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+      if (guides.isEmpty)
+        const Text('No matching guide found in the saved data.')
+      else ...[
+        const Text('Closest guides:'),
+        const SizedBox(height: 4),
+        for (final g in guides)
+          Card(
+            margin: const EdgeInsets.only(top: 6),
+            child: ListTile(
+              dense: true,
+              title: Text(g.title),
+              subtitle: Text(
+                '${g.topic}  •  ${g.reviewedBy == null ? 'not yet verified' : 'verified'}',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _openGuide(g),
+            ),
+          ),
+      ],
+      if (drafts.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Text('Related drafts', style: Theme.of(context).textTheme.labelMedium),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final s in drafts)
+              ActionChip(
+                avatar: const Icon(Icons.description_outlined, size: 16),
+                label: Text(s.title),
+                onPressed: () => _openDraft(s.id),
+              ),
+          ],
+        ),
+      ],
+      const SizedBox(height: 12),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          FilledButton.tonalIcon(
+            onPressed: _sending ? null : () => _explain(q, guides),
+            icon: const Icon(Icons.auto_awesome, size: 18),
+            label: const Text('Explain with AI'),
+          ),
+          OutlinedButton.icon(
+            onPressed: () => _searchWeb(q),
+            icon: const Icon(Icons.public, size: 18),
+            label: const Text('Find on the web'),
+          ),
+        ],
+      ),
+    ]);
+  }
+
+  Widget _aiBubble(_Msg m) {
+    final a = m.answer;
+    final drafts = [
+      for (final id in a?.draftIds ?? <String>[])
+        if (SchemaService.getSchema(id) != null) SchemaService.getSchema(id)!,
+    ];
+
+    return _botBox([
+      Row(
+        children: [
+          const Icon(Icons.auto_awesome, size: 16),
+          const SizedBox(width: 4),
+          Text(
+            'AI explanation (needs internet)',
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+      SelectableText(m.text),
+      if (a != null && !a.grounded) ...[
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Icon(Icons.info_outline, size: 16),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                'No verified guide covers this. Please consult an advocate.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+          ],
+        ),
+      ],
+      if (a != null && a.guides.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Text('Related guides', style: Theme.of(context).textTheme.labelMedium),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final g in a.guides)
+              ActionChip(
+                label: Text(g.title),
+                onPressed: () => _openGuideById(g.id),
+              ),
+          ],
+        ),
+      ],
+      if (drafts.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Text('Related drafts', style: Theme.of(context).textTheme.labelMedium),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final s in drafts)
+              ActionChip(
+                avatar: const Icon(Icons.description_outlined, size: 16),
+                label: Text(s.title),
+                onPressed: () => _openDraft(s.id),
+              ),
+          ],
+        ),
+      ],
+    ]);
+  }
+
+  Widget _bubble(_Msg m) {
+    if (m.fromUser) return _userBubble(m);
+    if (m.local != null) return _localBubble(m);
+    return _aiBubble(m);
   }
 
   @override
@@ -301,7 +430,7 @@ class _AskAiScreenState extends State<AskAiScreen> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
-                    onPressed: _sending ? null : _send,
+                    onPressed: _send,
                     icon: const Icon(Icons.send),
                   ),
                 ],

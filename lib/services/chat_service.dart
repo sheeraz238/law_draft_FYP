@@ -4,7 +4,10 @@ import 'draft_service.dart';
 import 'schema_service.dart';
 
 class ChatService {
-  Future<ChatAnswer> ask(String question) async {
+    Future<ChatAnswer> ask(
+    String question, {
+    List<String> guideIds = const [],
+  }) async {
     // Sirf wo drafts bhejo jin ka form maujood hai
     final drafts = [
       for (final c in DraftService.getCategories())
@@ -14,7 +17,8 @@ class ChatService {
     ];
 
     final res = await Supabase.instance.client.functions
-        .invoke('guide-chat', body: {'question': question, 'drafts': drafts})
+        .invoke('guide-chat',       body: {'question': question, 'drafts': drafts, 'guide_ids': guideIds},
+        )
         .timeout(const Duration(seconds: 45));
 
     final d = res.data;
