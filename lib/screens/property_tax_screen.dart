@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../core/format.dart';
 import '../core/tax_rates.dart';
 import '../services/property_tax_calculator.dart';
+import '../core/app_theme.dart';
+import '../widgets/ui_kit.dart';
 
 class PropertyTaxScreen extends StatefulWidget {
   const PropertyTaxScreen({super.key});
@@ -81,50 +83,133 @@ class _PropertyTaxScreenState extends State<PropertyTaxScreen> {
 
   String _pct(double r) => '${(r * 100).toStringAsFixed(2)}%';
 
-  Widget _row(String label, String value, {bool bold = false}) {
-    final style = bold ? const TextStyle(fontWeight: FontWeight.bold) : null;
+    Widget _row(String label, String value, {bool bold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(child: Text(label, style: style)),
+          Flexible(
+            child: Text(
+              label,
+              style: const TextStyle(color: AppColors.muted, fontSize: 13),
+            ),
+          ),
           const SizedBox(width: 12),
-          Text(value, style: style),
+          Text(
+            value,
+            style: AppTheme.mono(
+              size: 13,
+              weight: bold ? FontWeight.w600 : FontWeight.w500,
+              color: bold ? AppColors.amber : AppColors.text,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _partyCard(
+    IconData icon,
+    String title,
+    String section,
+    String rate,
+    double amount,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                IconBox(icon, size: 36),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Pill(section, color: const Color(0xFF60A5FA)),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _row('Rate', rate),
+            _row('Advance tax', 'PKR ${formatMoney(amount)}', bold: true),
+          ],
+        ),
       ),
     );
   }
 
   Widget _resultCard() {
     final r = _result!;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Result', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            _row('Taxable value', 'PKR ${formatMoney(r.value)}'),
-            const Divider(),
-            _row(
-              'Buyer tax (236K) @ ${_pct(r.buyerRate)}',
-              'PKR ${formatMoney(r.buyerTax)}',
+    final buyer = _partyCard(
+      Icons.shopping_bag_outlined,
+      'Buyer liability',
+      'S.236K',
+      _pct(r.buyerRate),
+      r.buyerTax,
+    );
+    final seller = _partyCard(
+      Icons.sell_outlined,
+      'Seller deductions',
+      'S.236C',
+      _pct(r.sellerRate),
+      r.sellerTax,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TOTAL ADVANCE TAX',
+                  style: AppTheme.mono(
+                    size: 11,
+                    weight: FontWeight.w600,
+                    color: AppColors.muted,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'PKR ${formatMoney(r.total)}',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineMedium?.copyWith(color: AppColors.amber),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'On a taxable value of PKR ${formatMoney(r.value)}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
             ),
-            _row(
-              'Seller tax (236C) @ ${_pct(r.sellerRate)}',
-              'PKR ${formatMoney(r.sellerTax)}',
-            ),
-            const Divider(),
-            _row(
-              'Total advance tax',
-              'PKR ${formatMoney(r.total)}',
-              bold: true,
-            ),
-          ],
+          ),
         ),
-      ),
+        const SizedBox(height: 8),
+        LayoutBuilder(
+          builder: (context, box) {
+            if (box.maxWidth >= 560) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: buyer),
+                  const SizedBox(width: 8),
+                  Expanded(child: seller),
+                ],
+              );
+            }
+            return Column(children: [buyer, seller]);
+          },
+        ),
+      ],
     );
   }
 
@@ -215,6 +300,7 @@ class _PropertyTaxScreenState extends State<PropertyTaxScreen> {
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       labelText: 'FBR / DC valuation (PKR)',
+                      prefixText: 'PKR ',
                       hintText: 'e.g. 2400000',
                       border: OutlineInputBorder(),
                     ),
@@ -227,6 +313,7 @@ class _PropertyTaxScreenState extends State<PropertyTaxScreen> {
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       labelText: 'Registry value (PKR)',
+                      prefixText: 'PKR ',
                       hintText: 'e.g. 2551500',
                       border: OutlineInputBorder(),
                     ),

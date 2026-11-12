@@ -75,7 +75,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: _items.isEmpty
                     ? const Center(
                         child: Text(
-                          'No favorite cases yet. Tap the heart on a case to save it.',
+                           'No favorite cases yet. Tap the bookmark on a case to save it.'
                         ),
                       )
                     : ListView.builder(

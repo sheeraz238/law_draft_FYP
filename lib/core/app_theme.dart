@@ -243,6 +243,16 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
       ),
       dividerTheme: const DividerThemeData(color: AppColors.hairline, space: 1),
+            dataTableTheme: DataTableThemeData(
+        headingRowColor: const WidgetStatePropertyAll(AppColors.sidebar),
+        headingTextStyle: mono(
+          size: 11,
+          weight: FontWeight.w600,
+          color: AppColors.muted,
+        ),
+        dataTextStyle: _b(13, FontWeight.w500),
+        dividerThickness: 0.6,
+      ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.elevated,

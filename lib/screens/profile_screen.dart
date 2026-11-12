@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/user_profile.dart';
 import '../services/profile_service.dart';
+import '../core/app_config.dart';
+import '../core/app_theme.dart';
+import '../widgets/ui_kit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -86,24 +89,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Widget _creditCard(String label, int value, IconData icon) {
+   Widget _creditCard(String label, int value, IconData icon) {
     return Expanded(
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(icon, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(label, style: Theme.of(context).textTheme.labelMedium),
-                  Text(
-                    '$value',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                ],
+              IconBox(icon),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label.toUpperCase(),
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTheme.mono(
+                        size: 10,
+                        weight: FontWeight.w600,
+                        color: AppColors.muted,
+                      ),
+                    ),
+                    Text(
+                      '$value',
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(color: AppColors.amber),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -121,7 +135,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       controller: c,
       decoration: InputDecoration(
         labelText: required ? '$label *' : label,
-        border: const OutlineInputBorder(),
       ),
       validator: required
           ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
@@ -136,82 +149,148 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return Center(child: Text(_error!, textAlign: TextAlign.center));
     }
     final p = _profile!;
+    final t = Theme.of(context).textTheme;
     final initial = p.fullName.isEmpty
         ? '?'
         : p.fullName.substring(0, 1).toUpperCase();
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 800),
+        constraints: const BoxConstraints(maxWidth: 900),
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            Row(
-              children: [
-                CircleAvatar(radius: 32, child: Text(initial)),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      p.fullName,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    Text(_service.email),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                _creditCard(
-                  'Drafts left',
-                  p.draftCredits,
-                  Icons.description_outlined,
-                ),
-                _creditCard(
-                  'Case law searches left',
-                  p.caselawCredits,
-                  Icons.layers_outlined,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 34,
+                      backgroundColor: const Color(0xFF3A2D12),
+                      child: Text(
+                        initial,
+                        style: const TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 26,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.amber,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(p.fullName, style: t.headlineSmall),
+                          const SizedBox(height: 2),
+                          Text(_service.email, style: t.bodySmall),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              Pill(
+                                p.lawFirm.isEmpty
+                                    ? 'INDIVIDUAL'
+                                    : p.lawFirm.toUpperCase(),
+                              ),
+                              if (p.city.isNotEmpty)
+                                Pill(
+                                  p.city.toUpperCase(),
+                                  color: const Color(0xFF60A5FA),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (AppConfig.enableCredits)
+              Row(
+                children: [
+                  _creditCard(
+                    'Drafts left',
+                    p.draftCredits,
+                    Icons.description_outlined,
+                  ),
+                  _creditCard(
+                    'Case law searches',
+                    p.caselawCredits,
+                    Icons.gavel_outlined,
+                  ),
+                ],
+              ),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Personal Information',
-                        style: Theme.of(context).textTheme.titleMedium,
+                      Row(
+                        children: [
+                          const NumberBadge('01'),
+                          const SizedBox(width: 12),
+                          Text('Personal information', style: t.titleLarge),
+                        ],
                       ),
                       const SizedBox(height: 16),
-                      _field(_name, 'Full name', required: true),
-                      const SizedBox(height: 12),
-                      _field(_firm, 'Law firm'),
-                      const SizedBox(height: 12),
-                      _field(_city, 'City'),
-                      const SizedBox(height: 12),
-                      _field(_enrollment, 'Enrollment no.'),
-                      const SizedBox(height: 12),
-                      _field(_whatsapp, 'WhatsApp'),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        onPressed: _saving ? null : _save,
-                        child: _saving
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                      LayoutBuilder(
+                        builder: (context, box) {
+                          final w = box.maxWidth >= 560
+                              ? (box.maxWidth - 16) / 2
+                              : box.maxWidth;
+                          return Wrap(
+                            spacing: 16,
+                            runSpacing: 14,
+                            children: [
+                              SizedBox(
+                                width: w,
+                                child: _field(
+                                  _name,
+                                  'Full name',
+                                  required: true,
                                 ),
-                              )
-                            : const Text('Save changes'),
+                              ),
+                              SizedBox(
+                                width: w,
+                                child: _field(_firm, 'Law firm'),
+                              ),
+                              SizedBox(width: w, child: _field(_city, 'City')),
+                              SizedBox(
+                                width: w,
+                                child: _field(_enrollment, 'Enrollment no.'),
+                              ),
+                              SizedBox(
+                                width: w,
+                                child: _field(_whatsapp, 'WhatsApp'),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 18),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: FilledButton(
+                          onPressed: _saving ? null : _save,
+                          child: _saving
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.canvas,
+                                  ),
+                                )
+                              : const Text('Save changes'),
+                        ),
                       ),
                     ],
                   ),

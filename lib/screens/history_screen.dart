@@ -4,6 +4,8 @@ import '../services/doc_exporter.dart';
 import '../services/draft_codec.dart';
 import '../services/draft_history_service.dart';
 import '../services/schema_service.dart';
+import '../core/app_theme.dart';
+import '../widgets/ui_kit.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -119,21 +121,45 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         itemBuilder: (context, i) {
                           final d = _items[i];
                           return Card(
-                            child: ListTile(
-                              leading: const Icon(Icons.description_outlined),
-                              title: Text(d.title),
-                              subtitle: Text(_fmt(d.createdAt)),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
+                            child: Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Row(
                                 children: [
-                                  IconButton(
+                                  const IconBox(Icons.description_outlined),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          d.title,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          _fmt(d.createdAt),
+                                          style: AppTheme.mono(
+                                            size: 11,
+                                            color: AppColors.muted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton.filledTonal(
                                     tooltip: 'Download again',
                                     icon: const Icon(Icons.download),
                                     onPressed: () => _download(d),
                                   ),
                                   IconButton(
                                     tooltip: 'Delete',
-                                    icon: const Icon(Icons.delete_outline),
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: AppColors.muted,
+                                    ),
                                     onPressed: () => _delete(d),
                                   ),
                                 ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/legal_guide.dart';
 import '../services/schema_service.dart';
 import 'draft_form_screen.dart';
+import '../core/app_theme.dart';
+import '../widgets/ui_kit.dart';
 
 class GuideDetailScreen extends StatelessWidget {
   final LegalGuide guide;
@@ -54,11 +56,36 @@ class GuideDetailScreen extends StatelessWidget {
               Text('Steps', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               for (var i = 0; i < guide.steps.length; i++)
-                Card(
-                  child: ListTile(
-                    leading: CircleAvatar(child: Text('${i + 1}')),
-                    title: Text(guide.steps[i].title),
-                    subtitle: Text(guide.steps[i].detail),
+                                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        NumberBadge('${i + 1}'.padLeft(2, '0')),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                guide.steps[i].title,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                guide.steps[i].detail,
+                                style: const TextStyle(
+                                  color: AppColors.muted,
+                                  height: 1.5,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               if (guide.documents.isNotEmpty) ...[

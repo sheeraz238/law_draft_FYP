@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/case_law.dart';
 import '../services/case_law_service.dart';
 import '../widgets/case_law_tile.dart';
+import '../widgets/ui_kit.dart';
 
 class CaseLawScreen extends StatefulWidget {
   const CaseLawScreen({super.key});
@@ -101,80 +102,111 @@ class _CaseLawScreenState extends State<CaseLawScreen> {
   }
 
   @override
+    @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 900),
+        constraints: const BoxConstraints(maxWidth: 1000),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text('Case Law Search', style: t.headlineMedium),
+              const SizedBox(height: 4),
               Text(
-                'Case Law Search',
-                style: Theme.of(context).textTheme.headlineMedium,
+                'Search saved case laws by keyword, citation, court and year.',
+                style: t.bodySmall,
               ),
               const SizedBox(height: 16),
-              SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(value: false, label: Text('Case Law')),
-                  ButtonSegment(value: true, label: Text('Citation')),
-                ],
-                selected: {_citationTab},
-                onSelectionChanged: (s) =>
-                    setState(() => _citationTab = s.first),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _keyword,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: _citationTab
-                      ? 'Enter citation...'
-                      : 'Enter keywords, case name, or legal topic...',
-                  border: const OutlineInputBorder(),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: SegmentedButton<bool>(
+                          segments: const [
+                            ButtonSegment(
+                              value: false,
+                              label: Text('Case Law'),
+                            ),
+                            ButtonSegment(value: true, label: Text('Citation')),
+                          ],
+                          selected: {_citationTab},
+                          onSelectionChanged: (s) =>
+                              setState(() => _citationTab = s.first),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _keyword,
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.search),
+                                hintText: _citationTab
+                                    ? 'Enter citation...'
+                                    : 'Keywords, case name or legal topic...',
+                              ),
+                              onSubmitted: (_) => _search(),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          FilledButton.icon(
+                            onPressed: _loading ? null : _search,
+                            icon: const Icon(Icons.search, size: 18),
+                            label: const Text('Search'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _court,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Court',
+                              ),
+                              items: [
+                                for (final c in CaseLawService.courts)
+                                  DropdownMenuItem(value: c, child: Text(c)),
+                              ],
+                              onChanged: (v) => setState(() => _court = v!),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextField(
+                              controller: _year,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Year (e.g. 2023)',
+                              ),
+                              onSubmitted: (_) => _search(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                onSubmitted: (_) => _search(),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: _court,
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Court',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        for (final c in CaseLawService.courts)
-                          DropdownMenuItem(value: c, child: Text(c)),
-                      ],
-                      onChanged: (v) => setState(() => _court = v!),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _year,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Year (e.g. 2023)',
-                        border: OutlineInputBorder(),
-                      ),
-                      onSubmitted: (_) => _search(),
-                    ),
-                  ),
+                  Text('Matched authorities', style: t.titleMedium),
+                  const SizedBox(width: 8),
+                  Pill('${_results.length}'),
                 ],
               ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: _loading ? null : _search,
-                icon: const Icon(Icons.search),
-                label: const Text('Search Cases'),
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               Expanded(child: _results_()),
             ],
           ),

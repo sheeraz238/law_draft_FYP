@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/inheritance_calculator.dart';
+import '../core/app_theme.dart';
 
 class InheritanceScreen extends StatefulWidget {
   const InheritanceScreen({super.key});
@@ -85,11 +86,13 @@ class _InheritanceScreenState extends State<InheritanceScreen> {
         children: [
           IconButton(
             icon: const Icon(Icons.remove_circle_outline),
+                        color: AppColors.amber,
             onPressed: v > 0 ? () => setState(() => _c[key] = v - 1) : null,
           ),
           SizedBox(width: 28, child: Text('$v', textAlign: TextAlign.center)),
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
+                        color: AppColors.amber,
             onPressed: v < max ? () => setState(() => _c[key] = v + 1) : null,
           ),
         ],
@@ -97,7 +100,7 @@ class _InheritanceScreenState extends State<InheritanceScreen> {
     );
   }
 
-  Widget _group(String title, List<Widget> children) {
+    Widget _group(String title, List<Widget> children) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
@@ -105,7 +108,15 @@ class _InheritanceScreenState extends State<InheritanceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              title.toUpperCase(),
+              style: AppTheme.mono(
+                size: 11,
+                weight: FontWeight.w600,
+                color: AppColors.amber,
+              ),
+            ),
+            const SizedBox(height: 4),
             ...children,
           ],
         ),

@@ -3,6 +3,8 @@ import '../models/legal_guide.dart';
 import '../services/guide_service.dart';
 import 'guide_detail_screen.dart';
 import '../services/local_search.dart';
+import '../core/app_theme.dart';
+import '../widgets/ui_kit.dart';
 
 class GuidesScreen extends StatefulWidget {
   const GuidesScreen({super.key});
@@ -129,16 +131,65 @@ class _GuidesScreenState extends State<GuidesScreen> {
                         itemCount: items.length,
                         itemBuilder: (context, i) {
                           final g = items[i];
-                          return Card(
-                            child: ListTile(
-                              leading: const Icon(Icons.route_outlined),
-                              title: Text(g.title),
-                              subtitle: Text('${g.topic}  •  ${g.summary}'),
-                              trailing: const Icon(Icons.chevron_right),
+                                                    return Card(
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => GuideDetailScreen(guide: g),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const IconBox(Icons.route_outlined),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Wrap(
+                                            spacing: 8,
+                                            runSpacing: 6,
+                                            children: [
+                                              Pill(g.topic.toUpperCase()),
+                                              g.reviewedBy == null
+                                                  ? const Pill(
+                                                      'NOT YET VERIFIED',
+                                                      color: AppColors.warning,
+                                                    )
+                                                  : const Pill(
+                                                      'VERIFIED',
+                                                      color: AppColors.success,
+                                                    ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            g.title,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleLarge,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            g.summary,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.chevron_right,
+                                      color: AppColors.muted,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
