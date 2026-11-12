@@ -28,9 +28,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Law Draft',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
+            theme: AppTheme.dark,
       darkTheme: AppTheme.dark,
-      themeMode: _mode,
+      themeMode: ThemeMode.dark,
       home: AuthGate(
         onToggleTheme: () => setState(() {
           _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;

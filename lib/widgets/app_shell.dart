@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/app_info.dart';
 import '../core/app_theme.dart';
+import '../models/user_profile.dart';
 import '../screens/about_screen.dart';
 import '../screens/ask_ai_screen.dart';
 import '../screens/case_law_screen.dart';
@@ -13,6 +14,7 @@ import '../screens/placeholder_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/property_tax_screen.dart';
 import '../services/auth_service.dart';
+import '../services/profile_service.dart';
 
 class NavItem {
   final String section;
@@ -22,20 +24,21 @@ class NavItem {
 }
 
 const navItems = [
-  NavItem('DRAFTING', 'Draft Library', Icons.menu_book_outlined),
-  NavItem('DRAFTING', 'Legal Guides', Icons.route_outlined),
-  NavItem('DRAFTING', 'My Drafts', Icons.history),
+  NavItem('DRAFTING', 'Draft Library', Icons.folder_open_outlined),
+  NavItem('DRAFTING', 'Legal Guides', Icons.menu_book_outlined),
+  NavItem('DRAFTING', 'My Drafts', Icons.edit_note_outlined),
   NavItem('RESEARCH', 'Case Laws', Icons.gavel_outlined),
-  NavItem('RESEARCH', 'Favorites', Icons.star_border),
-  NavItem('TOOLS', 'Property Tax Calc', Icons.apartment_outlined),
-  NavItem('TOOLS', 'Inheritance Calc', Icons.calculate_outlined),
-  NavItem('ACCOUNT', 'Profile', Icons.person_outline),
-  NavItem('ACCOUNT', 'About', Icons.balance_outlined),
+  NavItem('RESEARCH', 'Favorites', Icons.bookmark_border),
+  NavItem('TOOLS', 'Property Tax Calc', Icons.calculate_outlined),
+  NavItem('TOOLS', 'Inheritance Calc', Icons.account_balance_outlined),
+  NavItem('ACCOUNT', 'Profile', Icons.badge_outlined),
+  NavItem('ACCOUNT', 'About', Icons.info_outline),
 ];
 
 class AppShell extends StatefulWidget {
-  final VoidCallback onToggleTheme;
-  const AppShell({super.key, required this.onToggleTheme});
+  // ab dark theme hi hai, ye sirf purane code ke saath chalne ke liye rakha hai
+  final VoidCallback? onToggleTheme;
+  const AppShell({super.key, this.onToggleTheme});
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -47,6 +50,23 @@ class _AppShellState extends State<AppShell> {
   final Set<int> _visited = {0};
   bool _chatOpen = false;
   bool _chatCreated = false;
+  UserProfile? _profile;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final p = await ProfileService().fetch();
+      if (!mounted) return;
+      setState(() => _profile = p);
+    } catch (_) {
+      // top bar mein naam nahi aayega, baqi app chalti rahegi
+    }
+  }
 
   // in pages ko har baar taaza data chahiye
   bool _isFresh(int i) =>
@@ -91,7 +111,6 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _sidebar({required bool inDrawer, double? width}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final tiles = <Widget>[];
     String? last;
     for (var i = 0; i < navItems.length; i++) {
@@ -100,14 +119,15 @@ class _AppShellState extends State<AppShell> {
         last = n.section;
         tiles.add(
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 6),
+            padding: const EdgeInsets.fromLTRB(20, 22, 20, 6),
             child: Text(
               n.section,
               style: const TextStyle(
+                fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 letterSpacing: 1.2,
                 fontWeight: FontWeight.w700,
-                color: Color(0x8AFFFFFF),
+                color: AppColors.faint,
               ),
             ),
           ),
@@ -127,26 +147,31 @@ class _AppShellState extends State<AppShell> {
 
     return Container(
       width: width,
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.navyDeep : AppColors.navy,
-        border: const Border(right: BorderSide(color: Color(0x1FFFFFFF))),
+      decoration: const BoxDecoration(
+        color: AppColors.sidebar,
+        border: Border(right: BorderSide(color: AppColors.hairline)),
       ),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 6),
               child: Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: AppColors.gold,
-                      shape: BoxShape.circle,
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0x4DE5A93C)),
                     ),
-                    child: const Icon(Icons.balance, color: AppColors.navy),
+                    child: const Icon(
+                      Icons.balance,
+                      size: 20,
+                      color: AppColors.amber,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -156,20 +181,17 @@ class _AppShellState extends State<AppShell> {
                         Text(
                           AppInfo.appName,
                           style: const TextStyle(
-                            fontFamily: 'PlayfairDisplay',
-                            fontSize: 20,
+                            fontFamily: 'Outfit',
+                            fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
                         Text(
-                          AppInfo.tagline,
+                          AppInfo.tagline.toUpperCase(),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Color(0x8AFFFFFF),
-                          ),
+                          style: AppTheme.mono(size: 9, color: AppColors.amber),
                         ),
                       ],
                     ),
@@ -183,107 +205,212 @@ class _AppShellState extends State<AppShell> {
                 children: tiles,
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'General information only. Not legal advice.',
-                style: TextStyle(fontSize: 11, color: Color(0x73FFFFFF)),
+            Container(
+              margin: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.hairline),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: AppColors.amber,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'General information only. Not legal advice.',
+                      style: AppTheme.mono(size: 10, color: AppColors.muted),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _userChip(bool showText) {
+    final name = (_profile?.fullName ?? '').trim();
+    final firm = (_profile?.lawFirm ?? '').trim();
+    final initial = name.isEmpty ? '?' : name.substring(0, 1).toUpperCase();
+    return Container(
+      padding: const EdgeInsets.fromLTRB(6, 6, 12, 6),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.hairline),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 15,
+            backgroundColor: const Color(0xFF3A2D12),
+            child: Text(
+              initial,
+              style: const TextStyle(
+                color: AppColors.amber,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          if (showText && name.isNotEmpty) ...[
+            const SizedBox(width: 10),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                ),
+                if (firm.isNotEmpty)
+                  Text(
+                    firm,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.muted,
+                      height: 1.2,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }
 
   Widget _chatPanel(bool wide, BoxConstraints box) {
-    final scheme = Theme.of(context).colorScheme;
-    final panel = Visibility(
-      visible: _chatOpen,
-      maintainState: true,
-      child: Material(
-        elevation: 12,
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(wide ? 18 : 0),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            Container(
-              color: AppColors.navy,
-              padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 16,
-                    backgroundColor: AppColors.gold,
-                    child: Icon(
-                      Icons.auto_awesome,
-                      size: 18,
-                      color: AppColors.navy,
+    final w = wide ? (box.maxWidth < 460 ? box.maxWidth : 460.0) : box.maxWidth;
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      top: 0,
+      bottom: 0,
+      width: w,
+      right: _chatOpen ? 0 : -(w + 8),
+      child: IgnorePointer(
+        ignoring: !_chatOpen,
+        child: Container(
+          decoration: const BoxDecoration(
+            color: AppColors.sidebar,
+            border: Border(left: BorderSide(color: AppColors.line)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: AppColors.hairline)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF3A2D12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0x4DE5A93C)),
+                      ),
+                      child: const Icon(
+                        Icons.auto_awesome,
+                        size: 20,
+                        color: AppColors.amber,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Ask AI',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Ask AI',
+                            style: TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Legal guides assistant',
-                          style: TextStyle(
-                            color: Color(0x8AFFFFFF),
-                            fontSize: 11,
+                          Text(
+                            'LEGAL GUIDES ASSISTANT',
+                            style: AppTheme.mono(
+                              size: 10,
+                              color: AppColors.amber,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    tooltip: 'Close',
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: _toggleChat,
-                  ),
-                ],
+                    IconButton(
+                      tooltip: 'Close',
+                      icon: const Icon(Icons.close, color: AppColors.muted),
+                      onPressed: _toggleChat,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Expanded(child: AskAiScreen()),
-          ],
+              const Expanded(child: AskAiScreen()),
+            ],
+          ),
         ),
       ),
     );
-
-    if (!wide) return Positioned.fill(child: panel);
-    final w = box.maxWidth - 48 < 420 ? box.maxWidth - 48 : 420.0;
-    final h = box.maxHeight - 110 < 620 ? box.maxHeight - 110 : 620.0;
-    return Positioned(right: 24, bottom: 92, width: w, height: h, child: panel);
   }
 
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.of(context).size.width >= 800;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pageTitle = navItems[_index].title;
 
     final appBar = AppBar(
+      toolbarHeight: 64,
       automaticallyImplyLeading: !wide,
-      title: wide ? null : Text(navItems[_index].title),
+      titleSpacing: wide ? 24 : null,
+      title: wide
+          ? Row(
+              children: [
+                Text(
+                  'LAW DRAFT',
+                  style: AppTheme.mono(size: 11, color: AppColors.faint),
+                ),
+                const SizedBox(width: 8),
+                const Text('/', style: TextStyle(color: AppColors.faint)),
+                const SizedBox(width: 8),
+                Text(
+                  pageTitle,
+                  style: const TextStyle(
+                    fontFamily: 'Outfit',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            )
+          : Text(pageTitle),
       actions: [
-        IconButton(
-          tooltip: 'Toggle theme',
-          icon: Icon(
-            isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-          ),
-          onPressed: widget.onToggleTheme,
-        ),
+        _userChip(wide),
+        const SizedBox(width: 4),
         IconButton(
           tooltip: 'Log out',
-          icon: const Icon(Icons.logout),
+          icon: const Icon(Icons.logout, color: AppColors.muted),
           onPressed: () {
             AskAiScreen.clearChat();
             AuthService().signOut();
@@ -293,15 +420,12 @@ class _AppShellState extends State<AppShell> {
       ],
     );
 
-    final fab = (_chatOpen && !wide)
+    final fab = _chatOpen
         ? null
         : FloatingActionButton(
             onPressed: _toggleChat,
             tooltip: 'Ask AI',
-            backgroundColor: AppColors.gold,
-            foregroundColor: AppColors.navy,
-            shape: const CircleBorder(),
-            child: Icon(_chatOpen ? Icons.close : Icons.auto_awesome),
+            child: const Icon(Icons.auto_awesome),
           );
 
     final content = IndexedStack(
@@ -319,6 +443,13 @@ class _AppShellState extends State<AppShell> {
       builder: (context, box) => Stack(
         children: [
           Positioned.fill(child: content),
+          if (_chatOpen)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _toggleChat,
+                child: const ColoredBox(color: Color(0x99000000)),
+              ),
+            ),
           if (_chatCreated) _chatPanel(wide, box),
         ],
       ),
@@ -330,7 +461,7 @@ class _AppShellState extends State<AppShell> {
         floatingActionButton: fab,
         body: Row(
           children: [
-            _sidebar(inDrawer: false, width: 270),
+            _sidebar(inDrawer: false, width: 260),
             Expanded(child: stack),
           ],
         ),
@@ -341,7 +472,7 @@ class _AppShellState extends State<AppShell> {
       appBar: appBar,
       floatingActionButton: fab,
       drawer: Drawer(
-        width: 290,
+        width: 280,
         shape: const RoundedRectangleBorder(),
         child: _sidebar(inDrawer: true),
       ),
@@ -362,32 +493,21 @@ class _NavTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fg = selected ? AppColors.canvas : AppColors.muted;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Material(
-        color: selected ? const Color(0x1FFFFFFF) : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        color: selected ? AppColors.amber : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: const Color(0x0DFFFFFF),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
             child: Row(
               children: [
-                Container(
-                  width: 3,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    color: selected ? AppColors.gold : Colors.transparent,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Icon(
-                  item.icon,
-                  size: 20,
-                  color: selected ? AppColors.gold : const Color(0xB3FFFFFF),
-                ),
+                Icon(item.icon, size: 20, color: fg),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -395,7 +515,7 @@ class _NavTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                      color: selected ? Colors.white : const Color(0xB3FFFFFF),
+                      color: selected ? AppColors.canvas : AppColors.text,
                     ),
                   ),
                 ),
