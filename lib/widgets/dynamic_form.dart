@@ -7,7 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/profile_service.dart';
 import '../core/app_config.dart';
 import '../services/draft_history_service.dart';
-
+import '../core/app_theme.dart';
+import 'ui_kit.dart';
 
 String formatDate(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -106,24 +107,30 @@ class _DynamicFormState extends State<DynamicForm> {
     }
   }
 
-  Widget _buildSection(FormSectionDef s) {
+  Widget _buildSection(int number, FormSectionDef s) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              s.title.toUpperCase(),
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                NumberBadge(number.toString().padLeft(2, '0')),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    s.title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             for (final f in s.fields) ...[
               _buildField(f),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
             ],
           ],
         ),
@@ -192,7 +199,7 @@ class _DynamicFormState extends State<DynamicForm> {
         fileExtension: 'docx',
         mimeType: MimeType.microsoftWord,
       );
-          try {
+      try {
         // history save na ho to bhi download kharab na ho
         await DraftHistoryService().save(widget.schema, _values);
       } catch (_) {}
@@ -226,9 +233,15 @@ class _DynamicFormState extends State<DynamicForm> {
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          Text(widget.schema.description),
+          Text(
+            widget.schema.description,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.muted),
+          ),
           const SizedBox(height: 16),
-          for (final s in widget.schema.sections) _buildSection(s),
+          for (var i = 0; i < widget.schema.sections.length; i++)
+            _buildSection(i + 1, widget.schema.sections[i]),
           Row(
             children: [
               Expanded(
@@ -330,8 +343,9 @@ class _PartiesFieldState extends State<_PartiesField> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(8),
+        color: AppColors.canvas,
+        border: Border.all(color: AppColors.line),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -339,8 +353,8 @@ class _PartiesFieldState extends State<_PartiesField> {
           Row(
             children: [
               Text(
-                'Party #${i + 1}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                'PARTY #${i + 1}',
+                style: AppTheme.mono(size: 11, weight: FontWeight.w600),
               ),
               const Spacer(),
               if (_parties.length > 1)
