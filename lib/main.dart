@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Law Draft',
       debugShowCheckedModeBanner: false,
-            theme: AppTheme.dark,
+      theme: AppTheme.dark,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
       home: AuthGate(
