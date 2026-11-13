@@ -5,6 +5,8 @@ class CaseLaw {
   final String court;
   final int? year;
   final String summary;
+    final String? sourceUrl;
+  final String? topic;
 
   const CaseLaw({
     required this.id,
@@ -13,6 +15,8 @@ class CaseLaw {
     required this.court,
     required this.year,
     required this.summary,
+        this.sourceUrl,
+    this.topic,
   });
 
   factory CaseLaw.fromMap(Map<String, dynamic> m) => CaseLaw(
@@ -22,5 +26,7 @@ class CaseLaw {
         court: (m['court'] ?? '') as String,
         year: m['year'] as int?,
         summary: (m['summary'] ?? '') as String,
+                sourceUrl: m['source_url'] as String?,
+    topic: m['topic'] as String?,
       );
 }

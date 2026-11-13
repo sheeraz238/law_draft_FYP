@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/form_schema.dart';
-import 'package:file_saver/file_saver.dart';
-import '../services/docx_builder.dart';
-import '../services/draft_renderer.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/profile_service.dart';
 import '../core/app_config.dart';
 import '../services/draft_history_service.dart';
 import '../core/app_theme.dart';
 import 'ui_kit.dart';
+import '../services/doc_exporter.dart';
 
 String formatDate(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -188,17 +186,10 @@ class _DynamicFormState extends State<DynamicForm> {
   Future<void> _generate() async {
     if (!_formKey.currentState!.validate()) return;
     try {
-      final lines = DraftRenderer.render(widget.schema, _values);
-      final bytes = DocxBuilder.build(lines);
       final left = AppConfig.enableCredits
           ? await ProfileService().useDraftCredit()
           : null;
-      await FileSaver.instance.saveFile(
-        name: '${widget.schema.id}_draft',
-        bytes: bytes,
-        fileExtension: 'docx',
-        mimeType: MimeType.microsoftWord,
-      );
+      await DocExporter.download(widget.schema, _values);
       try {
         // history save na ho to bhi download kharab na ho
         await DraftHistoryService().save(widget.schema, _values);

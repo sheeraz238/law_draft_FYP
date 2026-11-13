@@ -375,8 +375,22 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
+    return PopScope(
+      canPop: _index == 0 && !_chatOpen,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_chatOpen) {
+          _toggleChat();
+        } else if (_index != 0) {
+          _select(0);
+        }
+      },
+      child: _buildScaffold(context),
+    );
+  }
+  Widget _buildScaffold(BuildContext context) {
     final wide = MediaQuery.of(context).size.width >= 800;
     final pageTitle = navItems[_index].title;
 

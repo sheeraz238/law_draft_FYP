@@ -115,8 +115,8 @@ class _CaseLawScreenState extends State<CaseLawScreen> {
             children: [
               Text('Case Law Search', style: t.headlineMedium),
               const SizedBox(height: 4),
-              Text(
-                'Search saved case laws by keyword, citation, court and year.',
+                            Text(
+                'Short notes with links to the official judgment. Always read the full judgment before citing it.',
                 style: t.bodySmall,
               ),
               const SizedBox(height: 16),

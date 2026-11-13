@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../models/case_law.dart';
 import 'ui_kit.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CaseLawTile extends StatelessWidget {
   final CaseLaw caseLaw;
@@ -116,6 +117,22 @@ class CaseLawTile extends StatelessWidget {
                         style: const TextStyle(fontSize: 13, height: 1.55),
                       ),
                     ],
+                  ),
+                ),
+              ],
+                            if ((caseLaw.sourceUrl ?? '').isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      final u = Uri.tryParse(caseLaw.sourceUrl!);
+                      if (u != null) {
+                        launchUrl(u, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: const Text('Open official source'),
                   ),
                 ),
               ],
