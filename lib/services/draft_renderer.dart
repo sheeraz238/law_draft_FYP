@@ -12,6 +12,12 @@ class DraftRenderer {
         return _bail(v, preArrest: true);
       case 'post_arrest_bail':
         return _bail(v, preArrest: false);
+      case 'return_surety':
+        return _returnSurety(v);
+      case 'eviction':
+        return _eviction(v);
+      case 'written_statement':
+        return _writtenStatement(v);
       default:
         return [DocLine('Template not available for ${schema.title}')];
     }
@@ -229,6 +235,202 @@ class DraftRenderer {
       DocLine(prayer, align: LineAlign.justify),
       DocLine.blank,
       DocLine('Applicant', bold: true, align: LineAlign.right),
+      DocLine('Through Counsel', align: LineAlign.right),
+    ];
+  }
+
+  // Ek box ki har line ko alag point banata hai
+  static List<String> _lines(String s) =>
+      s.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+
+  // SAMPLE wording. Asli matan advocate se verify karwana.
+  static List<DocLine> _returnSurety(Map<String, dynamic> v) {
+    final first = v['first_party'] as Map<String, dynamic>;
+    final orderDate = _fmt(v['bail_order_date'] as DateTime);
+    var n = 0;
+    String no() => '${++n}. ';
+
+    return [
+      DocLine(
+        _s(v['court_name']).toUpperCase(),
+        bold: true,
+        align: LineAlign.center,
+      ),
+      DocLine.blank,
+      ..._parties(first),
+      DocLine('VERSUS', bold: true, align: LineAlign.center),
+      DocLine('THE STATE'),
+      DocLine('...Respondent', bold: true, align: LineAlign.right),
+      DocLine.blank,
+      DocLine(
+        'APPLICATION FOR RETURN OF SURETY',
+        bold: true,
+        underline: true,
+        align: LineAlign.center,
+      ),
+      DocLine.blank,
+      DocLine('Respectfully Sheweth:', bold: true),
+      DocLine(
+        '${no()}That the accused ${_s(v['accused_name'])} was granted bail by '
+        'this Honourable Court on $orderDate in FIR No. ${_s(v['fir_no'])} '
+        'registered at Police Station ${_s(v['police_station'])}.',
+        align: LineAlign.justify,
+      ),
+      DocLine(
+        '${no()}That the applicant stood surety for the accused in the '
+        'amount of PKR ${_s(v['surety_amount'])} and furnished '
+        '${_s(v['surety_documents'])}.',
+        align: LineAlign.justify,
+      ),
+      DocLine(
+        '${no()}That ${_s(v['return_reason'])}',
+        align: LineAlign.justify,
+      ),
+      DocLine(
+        '${no()}That the applicant now wishes to be discharged from the '
+        'liability of surety.',
+        align: LineAlign.justify,
+      ),
+      DocLine.blank,
+      DocLine('PRAYER', bold: true, align: LineAlign.center),
+      DocLine(
+        'It is, therefore, respectfully prayed that the applicant may kindly '
+        'be discharged as surety and that the documents furnished as surety '
+        'may be returned to the applicant.',
+        align: LineAlign.justify,
+      ),
+      DocLine.blank,
+      DocLine('Applicant', bold: true, align: LineAlign.right),
+      DocLine('Through Counsel', align: LineAlign.right),
+    ];
+  }
+
+  // SAMPLE wording. Asli matan aur lagu hone wala qanoon advocate se verify karwana.
+  static List<DocLine> _eviction(Map<String, dynamic> v) {
+    final first = v['first_party'] as Map<String, dynamic>;
+    final second = v['second_party'] as Map<String, dynamic>;
+    final start = _fmt(v['tenancy_start'] as DateTime);
+    final notice = _s(v['notice_date']);
+    var n = 0;
+    String no() => '${++n}. ';
+
+    return [
+      DocLine(
+        _s(v['court_name']).toUpperCase(),
+        bold: true,
+        align: LineAlign.center,
+      ),
+      DocLine.blank,
+      ..._parties(first),
+      DocLine('VERSUS', bold: true, align: LineAlign.center),
+      ..._parties(second),
+      DocLine.blank,
+      DocLine(
+        'PETITION FOR EVICTION OF TENANT',
+        bold: true,
+        underline: true,
+        align: LineAlign.center,
+      ),
+      DocLine.blank,
+      DocLine('Respectfully Sheweth:', bold: true),
+      DocLine(
+        '${no()}That the petitioner is the landlord of the premises situated '
+        'at ${_s(v['premises_address'])}, which is a '
+        '${_s(v['premises_type']).toLowerCase()}.',
+        align: LineAlign.justify,
+      ),
+      DocLine(
+        '${no()}That the respondent has been the tenant of the said premises '
+        'since $start at a monthly rent of PKR ${_s(v['monthly_rent'])}.',
+        align: LineAlign.justify,
+      ),
+      DocLine(
+        '${no()}That the respondent is liable to be evicted on the following '
+        'ground: ${_s(v['ground'])}. ${_s(v['ground_details'])}',
+        align: LineAlign.justify,
+      ),
+      if (notice.isNotEmpty)
+        DocLine(
+          '${no()}That the petitioner served a notice on the respondent on '
+          '$notice, but the respondent has not vacated the premises.',
+          align: LineAlign.justify,
+        ),
+      DocLine(
+        '${no()}That this Honourable Court has jurisdiction to hear and '
+        'decide this petition.',
+        align: LineAlign.justify,
+      ),
+      DocLine.blank,
+      DocLine('PRAYER', bold: true, align: LineAlign.center),
+      DocLine(
+        'It is, therefore, respectfully prayed that the respondent may kindly '
+        'be directed to vacate the premises and hand over vacant possession '
+        'to the petitioner. Any other relief which this Honourable Court '
+        'deems fit may also be granted.',
+        align: LineAlign.justify,
+      ),
+      DocLine.blank,
+      DocLine('Petitioner', bold: true, align: LineAlign.right),
+      DocLine('Through Counsel', align: LineAlign.right),
+    ];
+  }
+
+  // SAMPLE wording. Asli matan advocate se verify karwana.
+  static List<DocLine> _writtenStatement(Map<String, dynamic> v) {
+    final first = v['first_party'] as Map<String, dynamic>;
+    final second = v['second_party'] as Map<String, dynamic>;
+    final objections = _lines(_s(v['objections']));
+    final reply = _lines(_s(v['reply']));
+    final extra = _lines(_s(v['additional_facts']));
+    final side = _s(second['type']).toUpperCase();
+    var n = 0;
+    String no() => '${++n}. ';
+
+    return [
+      DocLine(
+        _s(v['court_name']).toUpperCase(),
+        bold: true,
+        align: LineAlign.center,
+      ),
+      DocLine(
+        'Suit No. ${_s(v['suit_no'])}',
+        bold: true,
+        align: LineAlign.center,
+      ),
+      DocLine.blank,
+      ..._parties(first),
+      DocLine('VERSUS', bold: true, align: LineAlign.center),
+      ..._parties(second),
+      DocLine.blank,
+      DocLine(
+        'WRITTEN STATEMENT ON BEHALF OF THE $side',
+        bold: true,
+        underline: true,
+        align: LineAlign.center,
+      ),
+      DocLine('In the matter of: ${_s(v['suit_nature'])}', bold: true),
+      DocLine.blank,
+      DocLine('Respectfully Sheweth:', bold: true),
+      if (objections.isNotEmpty) ...[
+        DocLine('PRELIMINARY OBJECTIONS:', bold: true),
+        for (final o in objections)
+          DocLine('${no()}$o', align: LineAlign.justify),
+      ],
+      DocLine('REPLY ON FACTS:', bold: true),
+      for (final r in reply) DocLine('${no()}$r', align: LineAlign.justify),
+      if (extra.isNotEmpty) ...[
+        DocLine('ADDITIONAL FACTS:', bold: true),
+        for (final e in extra) DocLine('${no()}$e', align: LineAlign.justify),
+      ],
+      DocLine.blank,
+      DocLine('PRAYER', bold: true, align: LineAlign.center),
+      DocLine(
+        'It is, therefore, respectfully prayed that the suit of the plaintiff '
+        'may kindly be dismissed with costs.',
+        align: LineAlign.justify,
+      ),
+      DocLine.blank,
+      DocLine(_s(second['type']), bold: true, align: LineAlign.right),
       DocLine('Through Counsel', align: LineAlign.right),
     ];
   }
