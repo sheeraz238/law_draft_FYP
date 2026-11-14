@@ -242,6 +242,28 @@ class AppTheme {
         backgroundColor: AppColors.sidebar,
         surfaceTintColor: Colors.transparent,
       ),
+            navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.sidebar,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: const Color(0xFF3A2D12),
+        height: 64,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (s) => IconThemeData(
+            color: s.contains(WidgetState.selected)
+                ? AppColors.amber
+                : AppColors.muted,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (s) => _b(
+            11,
+            FontWeight.w600,
+            color: s.contains(WidgetState.selected)
+                ? AppColors.amber
+                : AppColors.muted,
+          ),
+        ),
+      ),
       dividerTheme: const DividerThemeData(color: AppColors.hairline, space: 1),
             dataTableTheme: DataTableThemeData(
         headingRowColor: const WidgetStatePropertyAll(AppColors.sidebar),

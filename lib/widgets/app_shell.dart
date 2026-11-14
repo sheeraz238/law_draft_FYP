@@ -4,15 +4,15 @@ import '../core/app_theme.dart';
 import '../models/user_profile.dart';
 import '../screens/about_screen.dart';
 import '../screens/ask_ai_screen.dart';
+import '../screens/calculators_screen.dart';
 import '../screens/case_law_screen.dart';
+import '../screens/dashboard_screen.dart';
 import '../screens/draft_library_screen.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/guides_screen.dart';
 import '../screens/history_screen.dart';
-import '../screens/inheritance_screen.dart';
 import '../screens/placeholder_screen.dart';
 import '../screens/profile_screen.dart';
-import '../screens/property_tax_screen.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 
@@ -24,13 +24,13 @@ class NavItem {
 }
 
 const navItems = [
+  NavItem('HOME', 'Dashboard', Icons.dashboard_outlined),
   NavItem('DRAFTING', 'Draft Library', Icons.folder_open_outlined),
-  NavItem('DRAFTING', 'Legal Guides', Icons.menu_book_outlined),
   NavItem('DRAFTING', 'My Drafts', Icons.edit_note_outlined),
+  NavItem('LEARN', 'Legal Guides', Icons.menu_book_outlined),
   NavItem('RESEARCH', 'Case Laws', Icons.gavel_outlined),
   NavItem('RESEARCH', 'Favorites', Icons.bookmark_border),
-  NavItem('TOOLS', 'Property Tax Calc', Icons.calculate_outlined),
-  NavItem('TOOLS', 'Inheritance Calc', Icons.account_balance_outlined),
+  NavItem('TOOLS', 'Calculators', Icons.calculate_outlined),
   NavItem('ACCOUNT', 'Profile', Icons.badge_outlined),
   NavItem('ACCOUNT', 'About', Icons.info_outline),
 ];
@@ -45,7 +45,9 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _index = 0;
+  int _calcTab = 0;
   // jo pages pehli baar khul chuke hain (zinda rakhe jayenge)
   final Set<int> _visited = {0};
   bool _chatOpen = false;
@@ -64,30 +66,41 @@ class _AppShellState extends State<AppShell> {
       if (!mounted) return;
       setState(() => _profile = p);
     } catch (_) {
-      // top bar mein naam nahi aayega, baqi app chalti rahegi
+      // naam nahi aayega, baqi app chalti rahegi
     }
   }
 
   // in pages ko har baar taaza data chahiye
-  bool _isFresh(int i) =>
-      const {'My Drafts', 'Favorites', 'Profile'}.contains(navItems[i].title);
+  bool _isFresh(int i) => const {
+    'Dashboard',
+    'My Drafts',
+    'Favorites',
+    'Profile',
+  }.contains(navItems[i].title);
 
   Widget _screenFor(int i) {
     switch (navItems[i].title) {
+      case 'Dashboard':
+        return DashboardScreen(
+          name: (_profile?.fullName ?? '').trim().split(' ').first,
+          onGo: (t) => _goTo(t),
+          onAskAi: _toggleChat,
+        );
       case 'Draft Library':
         return const DraftLibraryScreen();
-      case 'Legal Guides':
-        return const GuidesScreen();
       case 'My Drafts':
         return const HistoryScreen();
+      case 'Legal Guides':
+        return const GuidesScreen();
       case 'Case Laws':
         return const CaseLawScreen();
       case 'Favorites':
         return const FavoritesScreen();
-      case 'Property Tax Calc':
-        return const PropertyTaxScreen();
-      case 'Inheritance Calc':
-        return const InheritanceScreen();
+      case 'Calculators':
+        return CalculatorsScreen(
+          tab: _calcTab,
+          onChanged: (t) => setState(() => _calcTab = t),
+        );
       case 'Profile':
         return const ProfileScreen();
       case 'About':
@@ -102,6 +115,13 @@ class _AppShellState extends State<AppShell> {
     _visited.add(i);
   });
 
+  void _goTo(String title, {int? calcTab}) {
+    final i = navItems.indexWhere((n) => n.title == title);
+    if (i < 0) return;
+    if (calcTab != null) _calcTab = calcTab;
+    _select(i);
+  }
+
   void _toggleChat() {
     if (_chatOpen) FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
@@ -113,6 +133,10 @@ class _AppShellState extends State<AppShell> {
   Widget _sidebar({required bool inDrawer, double? width}) {
     final tiles = <Widget>[];
     String? last;
+    void close() {
+      if (inDrawer) Navigator.pop(context);
+    }
+
     for (var i = 0; i < navItems.length; i++) {
       final n = navItems[i];
       if (n.section != last) {
@@ -139,10 +163,24 @@ class _AppShellState extends State<AppShell> {
           selected: i == _index,
           onTap: () {
             _select(i);
-            if (inDrawer) Navigator.pop(context);
+            close();
           },
         ),
       );
+      if (n.title == 'Calculators') {
+        for (final s in const [(0, 'Property tax'), (1, 'Inheritance share')]) {
+          tiles.add(
+            _SubTile(
+              label: s.$2,
+              selected: i == _index && _calcTab == s.$1,
+              onTap: () {
+                _goTo('Calculators', calcTab: s.$1);
+                close();
+              },
+            ),
+          );
+        }
+      }
     }
 
     return Container(
@@ -375,7 +413,36 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
-    @override
+  int _bottomIndex() {
+    switch (navItems[_index].title) {
+      case 'Dashboard':
+        return 0;
+      case 'Draft Library':
+        return 1;
+      case 'Legal Guides':
+        return 2;
+      case 'Calculators':
+        return 3;
+      default:
+        return 4;
+    }
+  }
+
+  void _bottomTap(int i) {
+    if (i == 0) {
+      _goTo('Dashboard');
+    } else if (i == 1) {
+      _goTo('Draft Library');
+    } else if (i == 2) {
+      _goTo('Legal Guides');
+    } else if (i == 3) {
+      _goTo('Calculators');
+    } else {
+      _scaffoldKey.currentState?.openDrawer();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: _index == 0 && !_chatOpen,
@@ -390,6 +457,7 @@ class _AppShellState extends State<AppShell> {
       child: _buildScaffold(context),
     );
   }
+
   Widget _buildScaffold(BuildContext context) {
     final wide = MediaQuery.of(context).size.width >= 800;
     final pageTitle = navItems[_index].title;
@@ -483,6 +551,7 @@ class _AppShellState extends State<AppShell> {
     }
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: appBar,
       floatingActionButton: fab,
       drawer: Drawer(
@@ -491,6 +560,29 @@ class _AppShellState extends State<AppShell> {
         child: _sidebar(inDrawer: true),
       ),
       body: stack,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _bottomIndex(),
+        onDestinationSelected: _bottomTap,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.folder_open_outlined),
+            label: 'Drafts',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu_book_outlined),
+            label: 'Guides',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.calculate_outlined),
+            label: 'Tools',
+          ),
+          NavigationDestination(icon: Icon(Icons.menu), label: 'More'),
+        ],
+      ),
     );
   }
 }
@@ -535,6 +627,52 @@ class _NavTile extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SubTile extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _SubTile({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(44, 8, 12, 8),
+          child: Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.amber : AppColors.faint,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? AppColors.amber : AppColors.muted,
+                ),
+              ),
+            ],
           ),
         ),
       ),

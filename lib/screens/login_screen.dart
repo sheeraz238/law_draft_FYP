@@ -47,10 +47,25 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         await _auth.signIn(_email.text.trim(), _password.text);
       }
-    } on AuthException catch (e) {
-      setState(() => _error = e.message);
-    } catch (_) {
-      setState(() => _error = 'Something went wrong. Please try again.');
+        } on AuthException catch (e) {
+      final m = e.message.toLowerCase();
+      setState(
+        () => _error = m.contains('invalid login')
+            ? 'Email ya password ghalat hai.'
+            : m.contains('already')
+            ? 'Ye email pehle se register hai. Sign in karein.'
+            : e.message,
+      );
+    } catch (e) {
+      final s = e.toString().toLowerCase();
+      setState(
+        () => _error =
+            (s.contains('failed to fetch') ||
+                s.contains('socket') ||
+                s.contains('clientexception'))
+            ? 'Internet nahi hai ya server tak nahi pohanch sakay. Dobara koshish karein.'
+            : 'Kuch masla aa gaya. Dobara koshish karein.',
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
