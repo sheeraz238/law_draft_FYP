@@ -15,6 +15,7 @@ import '../screens/placeholder_screen.dart';
 import '../screens/profile_screen.dart';
 import '../services/auth_service.dart';
 import '../services/profile_service.dart';
+import '../screens/translator_screen.dart';
 
 class NavItem {
   final String section;
@@ -31,6 +32,7 @@ const navItems = [
   NavItem('RESEARCH', 'Case Laws', Icons.gavel_outlined),
   NavItem('RESEARCH', 'Favorites', Icons.bookmark_border),
   NavItem('TOOLS', 'Calculators', Icons.calculate_outlined),
+    NavItem('TOOLS', 'Translator', Icons.translate),
   NavItem('ACCOUNT', 'Profile', Icons.badge_outlined),
   NavItem('ACCOUNT', 'About', Icons.info_outline),
 ];
@@ -101,6 +103,8 @@ class _AppShellState extends State<AppShell> {
           tab: _calcTab,
           onChanged: (t) => setState(() => _calcTab = t),
         );
+              case 'Translator':
+        return const TranslatorScreen();
       case 'Profile':
         return const ProfileScreen();
       case 'About':

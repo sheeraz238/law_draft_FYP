@@ -7,6 +7,8 @@ import '../services/draft_history_service.dart';
 import '../core/app_theme.dart';
 import 'ui_kit.dart';
 import '../services/doc_exporter.dart';
+import '../screens/translator_screen.dart';
+import '../services/draft_renderer.dart';
 
 String formatDate(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -174,6 +176,22 @@ class _DynamicFormState extends State<DynamicForm> {
           child: SingleChildScrollView(child: Text(_summary())),
         ),
         actions: [
+          TextButton(
+            onPressed: () {
+              final text = DraftRenderer.render(
+                widget.schema,
+                _values,
+              ).map((l) => l.text).where((t) => t.isNotEmpty).join('\n');
+              Navigator.pop(ctx);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TranslatorPage(initialText: text),
+                ),
+              );
+            },
+            child: const Text('Translate'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Close'),

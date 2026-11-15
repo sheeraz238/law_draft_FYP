@@ -4,6 +4,7 @@ import '../services/schema_service.dart';
 import 'draft_form_screen.dart';
 import '../core/app_theme.dart';
 import '../widgets/ui_kit.dart';
+import '../screens/translator_screen.dart';
 
 class GuideDetailScreen extends StatelessWidget {
   final LegalGuide guide;
@@ -42,7 +43,31 @@ class GuideDetailScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(guide.title)),
+           appBar: AppBar(
+        title: Text(guide.title),
+        actions: [
+          IconButton(
+            tooltip: 'Translate',
+            icon: const Icon(Icons.translate),
+            onPressed: () {
+              final text = [
+                guide.title,
+                guide.summary,
+                for (var i = 0; i < guide.steps.length; i++)
+                  '${i + 1}. ${guide.steps[i].title}: ${guide.steps[i].detail}',
+                if (guide.documents.isNotEmpty)
+                  'Documents: ${guide.documents.join(', ')}',
+              ].join('\n');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TranslatorPage(initialText: text),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
