@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/app_theme.dart';
 import 'core/supabase_config.dart';
 import 'widgets/auth_gate.dart';
+import 'services/template_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,6 +11,7 @@ Future<void> main() async {
     url: SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
   );
+  await TemplateStore.loadCached();
   runApp(const MyApp());
 }
 

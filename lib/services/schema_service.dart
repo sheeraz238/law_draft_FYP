@@ -1,4 +1,5 @@
 import '../models/form_schema.dart';
+import 'template_store.dart';
 
 class SchemaService {
   // Abhi code mein. Baad mein Supabase (form_schema JSON) se aayega.
@@ -18,8 +19,9 @@ class SchemaService {
         return _eviction;
       case 'written_statement':
         return _writtenStatement;
-      default:
-        return null;
+        
+            default:
+        return TemplateStore.schemaFor(id);
     }
   }
 

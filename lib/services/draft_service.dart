@@ -1,4 +1,5 @@
 import '../models/draft_template.dart';
+import 'template_store.dart';
 
 class DraftService {
   static const tags = [
@@ -12,7 +13,9 @@ class DraftService {
   ];
 
   // Abhi sample data. Baad mein Supabase se aayega.
-  static List<DraftCategory> getCategories() {
+    static List<DraftCategory> getCategories() => TemplateStore.merge(_base());
+
+  static List<DraftCategory> _base() {
     return const [
       DraftCategory(
         id: 'important',

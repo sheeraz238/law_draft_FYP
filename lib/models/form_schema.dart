@@ -31,10 +31,12 @@ class DraftSchema {
   final String title;
   final String description;
   final List<FormSectionDef> sections;
+    final List<dynamic>? doc;
   const DraftSchema({
     required this.id,
     required this.title,
     required this.description,
     required this.sections,
+        this.doc,
   });
 }

@@ -5,6 +5,7 @@ import '../services/draft_service.dart';
 import '../services/schema_service.dart';
 import '../widgets/ui_kit.dart';
 import 'draft_form_screen.dart';
+import '../services/template_store.dart';
 
 class _Item {
   final DraftCategory category;
@@ -20,7 +21,7 @@ class DraftLibraryScreen extends StatefulWidget {
 }
 
 class _DraftLibraryScreenState extends State<DraftLibraryScreen> {
-  final _categories = DraftService.getCategories();
+    final _categories = DraftService.getCategories();
   String _query = '';
   String _tag = 'All';
 
@@ -192,8 +193,14 @@ class _DraftLibraryScreenState extends State<DraftLibraryScreen> {
     );
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: TemplateStore.version,
+      builder: (context, _, __) => _buildBody(context),
+    );
+  }
+  Widget _buildBody(BuildContext context) {
     final ready = <_Item>[];
     final soon = <DraftCategory>[];
     for (final c in _categories) {
