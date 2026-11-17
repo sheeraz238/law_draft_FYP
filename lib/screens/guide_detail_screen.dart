@@ -1,17 +1,45 @@
 import 'package:flutter/material.dart';
+import '../core/app_theme.dart';
 import '../models/legal_guide.dart';
 import '../services/schema_service.dart';
-import 'draft_form_screen.dart';
-import '../core/app_theme.dart';
+import '../services/share_helper.dart';
+import '../services/speech_service.dart';
 import '../widgets/ui_kit.dart';
-import '../screens/translator_screen.dart';
+import 'draft_form_screen.dart';
+import 'translator_screen.dart';
 
-class GuideDetailScreen extends StatelessWidget {
+class GuideDetailScreen extends StatefulWidget {
   final LegalGuide guide;
   const GuideDetailScreen({super.key, required this.guide});
 
+  @override
+  State<GuideDetailScreen> createState() => _GuideDetailScreenState();
+}
+
+class _GuideDetailScreenState extends State<GuideDetailScreen> {
+  LegalGuide get guide => widget.guide;
+
+  @override
+  void dispose() {
+    SpeechService.stop();
+    super.dispose();
+  }
+
   String _date(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Future<void> _toggleListen() async {
+    if (SpeechService.speaking.value) {
+      await SpeechService.stop();
+      return;
+    }
+    final err = await SpeechService.speak(
+      ShareHelper.guideText(guide, footer: false),
+    );
+    if (err != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+    }
+  }
 
   Widget _badge(BuildContext context) {
     final verified = guide.reviewedBy != null;
@@ -46,25 +74,37 @@ class GuideDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(guide.title),
         actions: [
+          ValueListenableBuilder<bool>(
+            valueListenable: SpeechService.speaking,
+            builder: (context, on, _) => IconButton(
+              tooltip: on ? 'Stop' : 'Listen',
+              icon: Icon(
+                on ? Icons.stop_circle_outlined : Icons.volume_up_outlined,
+              ),
+              onPressed: _toggleListen,
+            ),
+          ),
           IconButton(
             tooltip: 'Translate',
             icon: const Icon(Icons.translate),
             onPressed: () {
-              final text = [
-                guide.title,
-                guide.summary,
-                for (var i = 0; i < guide.steps.length; i++)
-                  '${i + 1}. ${guide.steps[i].title}: ${guide.steps[i].detail}',
-                if (guide.documents.isNotEmpty)
-                  'Documents: ${guide.documents.join(', ')}',
-              ].join('\n');
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => TranslatorPage(initialText: text),
+                  builder: (_) => TranslatorPage(
+                    initialText: ShareHelper.guideText(guide, footer: false),
+                  ),
                 ),
               );
             },
+          ),
+          IconButton(
+            tooltip: 'Share',
+            icon: const Icon(Icons.share_outlined),
+            onPressed: () => ShareHelper.shareText(
+              ShareHelper.guideText(guide),
+              subject: guide.title,
+            ),
           ),
         ],
       ),

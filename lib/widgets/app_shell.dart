@@ -17,6 +17,7 @@ import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 import '../screens/translator_screen.dart';
 import '../services/template_store.dart';
+import '../screens/reminder_screen.dart';
 
 class NavItem {
   final String section;
@@ -34,6 +35,7 @@ const navItems = [
   NavItem('RESEARCH', 'Favorites', Icons.bookmark_border),
   NavItem('TOOLS', 'Calculators', Icons.calculate_outlined),
   NavItem('TOOLS', 'Translator', Icons.translate),
+    NavItem('TOOLS', 'Hearing Reminder', Icons.event_available_outlined),
   NavItem('ACCOUNT', 'Profile', Icons.badge_outlined),
   NavItem('ACCOUNT', 'About', Icons.info_outline),
 ];
@@ -107,6 +109,8 @@ class _AppShellState extends State<AppShell> {
         );
       case 'Translator':
         return const TranslatorScreen();
+              case 'Hearing Reminder':
+        return const ReminderScreen();
       case 'Profile':
         return const ProfileScreen();
       case 'About':

@@ -4,6 +4,8 @@ import 'package:share_plus/share_plus.dart';
 import '../core/app_theme.dart';
 import '../services/translate_service.dart';
 import '../widgets/ui_kit.dart';
+import '../services/share_helper.dart';
+import '../services/speech_service.dart';
 
 class TranslatorScreen extends StatefulWidget {
   final String initialText;
@@ -182,12 +184,29 @@ class _TranslatorScreenState extends State<TranslatorScreen> {
                               );
                             },
                           ),
+                                                    if (_target != 'Sindhi')
+                            IconButton(
+                              tooltip: 'Listen',
+                              icon: const Icon(
+                                Icons.volume_up_outlined,
+                                size: 20,
+                              ),
+                              onPressed: () async {
+                                final err = await SpeechService.speak(
+                                  _result,
+                                  lang: _target == 'Urdu' ? 'ur-PK' : 'en-US',
+                                );
+                                if (err != null && mounted) {
+                                  ScaffoldMessenger.of(
+                                    context,
+                                  ).showSnackBar(SnackBar(content: Text(err)));
+                                }
+                              },
+                            ),
                           IconButton(
                             tooltip: 'Share',
                             icon: const Icon(Icons.share_outlined, size: 20),
-                            onPressed: () => SharePlus.instance.share(
-                              ShareParams(text: _result),
-                            ),
+                            onPressed: () => ShareHelper.shareText(_result),
                           ),
                         ],
                       ),

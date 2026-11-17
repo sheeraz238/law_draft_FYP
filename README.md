@@ -35,4 +35,4 @@ General information only, not legal advice. All draft wording is sample text and
 checked by an advocate before use. AI translations and explanations can contain mistakes.
 
 ## Team
-Developers: [Sheeraz Ahmed], [Mohsan Ali], [Asad Niaz]. Supervisor: [Prof. Asia Soomro].
+Developers: 
