@@ -102,7 +102,7 @@ class _CaseLawScreenState extends State<CaseLawScreen> {
   }
 
   @override
-    @override
+  @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     return Center(
@@ -115,7 +115,7 @@ class _CaseLawScreenState extends State<CaseLawScreen> {
             children: [
               Text('Case Law Search', style: t.headlineMedium),
               const SizedBox(height: 4),
-                            Text(
+              Text(
                 'Short notes with links to the official judgment. Always read the full judgment before citing it.',
                 style: t.bodySmall,
               ),
@@ -169,7 +169,7 @@ class _CaseLawScreenState extends State<CaseLawScreen> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: _court,
+                              initialValue: _court,
                               isExpanded: true,
                               decoration: const InputDecoration(
                                 labelText: 'Court',

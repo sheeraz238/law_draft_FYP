@@ -1,6 +1,7 @@
 import '../models/doc_line.dart';
 import '../models/form_schema.dart';
 import 'template_renderer.dart';
+
 class DraftRenderer {
   static List<DocLine> render(DraftSchema schema, Map<String, dynamic> v) {
     switch (schema.id) {
@@ -18,7 +19,7 @@ class DraftRenderer {
         return _eviction(v);
       case 'written_statement':
         return _writtenStatement(v);
-            default:
+      default:
         final doc = schema.doc;
         if (doc != null) return TemplateRenderer.render(doc, v);
         return [DocLine('Template not available for ${schema.title}')];

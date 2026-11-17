@@ -13,7 +13,7 @@ class DraftService {
   ];
 
   // Abhi sample data. Baad mein Supabase se aayega.
-    static List<DraftCategory> getCategories() => TemplateStore.merge(_base());
+  static List<DraftCategory> getCategories() => TemplateStore.merge(_base());
 
   static List<DraftCategory> _base() {
     return const [

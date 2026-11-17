@@ -81,7 +81,7 @@ class _DynamicFormState extends State<DynamicForm> {
         );
       case FieldType.dropdown:
         return DropdownButtonFormField<String>(
-          value: _values[f.key] as String,
+          initialValue: _values[f.key] as String,
           isExpanded: true,
           decoration: InputDecoration(
             labelText: _label(f),
@@ -392,7 +392,7 @@ class _PartiesFieldState extends State<_PartiesField> {
               const SizedBox(width: 8),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: p['relation'],
+                  initialValue: p['relation'],
                   isExpanded: true,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
@@ -468,7 +468,7 @@ class _PartiesFieldState extends State<_PartiesField> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: widget.data['type'] as String,
+          initialValue: widget.data['type'] as String,
           isExpanded: true,
           decoration: InputDecoration(
             labelText: '${widget.field.typeLabel ?? 'Party Type'} *',

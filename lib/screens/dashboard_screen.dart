@@ -143,7 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-                if (action != null) action,
+                ?action,
               ],
             ),
             const SizedBox(height: 8),

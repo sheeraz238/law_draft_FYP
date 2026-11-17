@@ -120,7 +120,7 @@ class CaseLawTile extends StatelessWidget {
                   ),
                 ),
               ],
-                            if ((caseLaw.sourceUrl ?? '').isNotEmpty) ...[
+              if ((caseLaw.sourceUrl ?? '').isNotEmpty) ...[
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerLeft,

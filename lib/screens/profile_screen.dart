@@ -89,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-   Widget _creditCard(String label, int value, IconData icon) {
+  Widget _creditCard(String label, int value, IconData icon) {
     return Expanded(
       child: Card(
         child: Padding(
@@ -133,9 +133,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     return TextFormField(
       controller: c,
-      decoration: InputDecoration(
-        labelText: required ? '$label *' : label,
-      ),
+      decoration: InputDecoration(labelText: required ? '$label *' : label),
       validator: required
           ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
           : null,

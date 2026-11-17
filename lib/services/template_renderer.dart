@@ -2,8 +2,7 @@ import '../models/doc_line.dart';
 
 /// Draft card ke "document" hisse se text banata hai
 class TemplateRenderer {
-  static final _ph =
-      RegExp(r'\{(\w+)(?:\.(type|name))?(?:\|(upper|lower))?\}');
+  static final _ph = RegExp(r'\{(\w+)(?:\.(type|name))?(?:\|(upper|lower))?\}');
 
   static List<DocLine> render(List<dynamic> spec, Map<String, dynamic> v) {
     final out = <DocLine>[];
@@ -34,8 +33,12 @@ class TemplateRenderer {
     return out;
   }
 
-  static DocLine _line(Map<String, dynamic> s, Map<String, dynamic> v,
-      {String? item, int? num}) {
+  static DocLine _line(
+    Map<String, dynamic> s,
+    Map<String, dynamic> v, {
+    String? item,
+    int? num,
+  }) {
     final text = _fill('${s['t'] ?? ''}', v, item);
     return DocLine(
       num == null ? text : '$num. $text',
@@ -78,7 +81,9 @@ class TemplateRenderer {
       if (part == 'type') return '${x['type'] ?? ''}';
       if (part == 'name') {
         final l = x['parties'] as List?;
-        if (l != null && l.isNotEmpty) return '${(l.first as Map)['name'] ?? ''}';
+        if (l != null && l.isNotEmpty) {
+          return '${(l.first as Map)['name'] ?? ''}';
+        }
       }
       return '';
     }
@@ -94,11 +99,8 @@ class TemplateRenderer {
     return _value(v[c], null).isNotEmpty;
   }
 
-  static List<String> _lines(String s) => s
-      .split('\n')
-      .map((e) => e.trim())
-      .where((e) => e.isNotEmpty)
-      .toList();
+  static List<String> _lines(String s) =>
+      s.split('\n').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
   static List<DocLine> _parties(dynamic party) {
     if (party is! Map) return [];
@@ -109,13 +111,16 @@ class TemplateRenderer {
       final caste = '${p['caste'] ?? ''}'.trim();
       final casteText = caste.isEmpty ? '' : ', Caste $caste';
       final prefix = list.length > 1 ? '${i + 1}. ' : '';
-      lines.add(DocLine(
-        '$prefix${p['name']} ${p['relation']} ${p['father']}$casteText, R/o ${p['address']}',
-        align: LineAlign.justify,
-      ));
+      lines.add(
+        DocLine(
+          '$prefix${p['name']} ${p['relation']} ${p['father']}$casteText, R/o ${p['address']}',
+          align: LineAlign.justify,
+        ),
+      );
     }
-    lines.add(DocLine('...${party['type']}',
-        bold: true, align: LineAlign.right));
+    lines.add(
+      DocLine('...${party['type']}', bold: true, align: LineAlign.right),
+    );
     return lines;
   }
 }

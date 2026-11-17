@@ -4,7 +4,7 @@ import 'template_store.dart';
 class SchemaService {
   // Abhi code mein. Baad mein Supabase (form_schema JSON) se aayega.
   static DraftSchema? getSchema(String id) {
-        switch (id) {
+    switch (id) {
       case 'notice':
         return _notice;
       case 'khula_suit':
@@ -13,14 +13,14 @@ class SchemaService {
         return _preArrestBail;
       case 'post_arrest_bail':
         return _postArrestBail;
-              case 'return_surety':
+      case 'return_surety':
         return _returnSurety;
       case 'eviction':
         return _eviction;
       case 'written_statement':
         return _writtenStatement;
-        
-            default:
+
+      default:
         return TemplateStore.schemaFor(id);
     }
   }
@@ -137,7 +137,7 @@ class SchemaService {
       ),
     ],
   );
-    // --- Common blocks ---
+  // --- Common blocks ---
   static FormSectionDef _courtName(String hint) => FormSectionDef(
     title: 'Court Name',
     fields: [
@@ -312,7 +312,7 @@ class SchemaService {
       ),
     ],
   );
-    // --- Return of Surety ---
+  // --- Return of Surety ---
   static final _returnSurety = DraftSchema(
     id: 'return_surety',
     title: 'Application for Return of Surety',

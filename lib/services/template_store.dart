@@ -77,21 +77,24 @@ class TemplateStore {
       final fields = <FormFieldDef>[];
       for (final f in (s['fields'] as List)) {
         final type = _type('${f['type'] ?? 'text'}');
-        final options =
-            ((f['options'] as List?) ?? const []).map((e) => '$e').toList();
+        final options = ((f['options'] as List?) ?? const [])
+            .map((e) => '$e')
+            .toList();
         if ((type == FieldType.dropdown || type == FieldType.parties) &&
             options.isEmpty) {
           throw Exception('options needed');
         }
-        fields.add(FormFieldDef(
-          key: '${f['key']}',
-          label: '${f['label']}',
-          type: type,
-          required: f['required'] != false,
-          hint: f['hint'] as String?,
-          options: options,
-          typeLabel: f['typeLabel'] as String?,
-        ));
+        fields.add(
+          FormFieldDef(
+            key: '${f['key']}',
+            label: '${f['label']}',
+            type: type,
+            required: f['required'] != false,
+            hint: f['hint'] as String?,
+            options: options,
+            typeLabel: f['typeLabel'] as String?,
+          ),
+        );
       }
       sections.add(FormSectionDef(title: '${s['title']}', fields: fields));
     }
@@ -126,11 +129,9 @@ class TemplateStore {
         ids[cat] = cat.toLowerCase().replaceAll(' ', '_');
         return <DraftTemplate>[];
       });
-      list.add(DraftTemplate(
-        id: id,
-        title: '${r['title']}',
-        tag: '${r['tag'] ?? ''}',
-      ));
+      list.add(
+        DraftTemplate(id: id, title: '${r['title']}', tag: '${r['tag'] ?? ''}'),
+      );
     }
     return [
       for (final n in names)

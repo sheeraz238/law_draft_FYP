@@ -83,7 +83,7 @@ class _PropertyTaxScreenState extends State<PropertyTaxScreen> {
 
   String _pct(double r) => '${(r * 100).toStringAsFixed(2)}%';
 
-    Widget _row(String label, String value, {bool bold = false}) {
+  Widget _row(String label, String value, {bool bold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(

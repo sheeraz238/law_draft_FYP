@@ -43,7 +43,7 @@ class GuideDetailScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-           appBar: AppBar(
+      appBar: AppBar(
         title: Text(guide.title),
         actions: [
           IconButton(
@@ -81,7 +81,7 @@ class GuideDetailScreen extends StatelessWidget {
               Text('Steps', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
               for (var i = 0; i < guide.steps.length; i++)
-                                Card(
+                Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(

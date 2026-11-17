@@ -131,7 +131,7 @@ class _GuidesScreenState extends State<GuidesScreen> {
                         itemCount: items.length,
                         itemBuilder: (context, i) {
                           final g = items[i];
-                                                    return Card(
+                          return Card(
                             clipBehavior: Clip.antiAlias,
                             child: InkWell(
                               onTap: () => Navigator.push(

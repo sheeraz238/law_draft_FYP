@@ -55,7 +55,8 @@ class CaseLawService {
         .order('created_at', ascending: false);
     return rows
         .map<CaseLaw>(
-            (r) => CaseLaw.fromMap(r['case_laws'] as Map<String, dynamic>))
+          (r) => CaseLaw.fromMap(r['case_laws'] as Map<String, dynamic>),
+        )
         .toList();
   }
 }

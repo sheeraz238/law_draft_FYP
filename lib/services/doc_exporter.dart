@@ -12,7 +12,9 @@ class DocExporter {
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
   static Future<void> download(
-      DraftSchema schema, Map<String, dynamic> values) async {
+    DraftSchema schema,
+    Map<String, dynamic> values,
+  ) async {
     final lines = DraftRenderer.render(schema, values);
     final bytes = DocxBuilder.build(lines);
     final name = '${schema.id}_draft';

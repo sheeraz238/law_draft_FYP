@@ -10,7 +10,7 @@ class DocxBuilder {
     _add(archive, '_rels/.rels', _rels);
     _add(archive, 'word/document.xml', _document(lines));
     final data = ZipEncoder().encode(archive);
-    return Uint8List.fromList(data!);
+    return Uint8List.fromList(data);
   }
 
   static void _add(Archive archive, String name, String content) {

@@ -4,7 +4,7 @@ import 'draft_service.dart';
 import 'schema_service.dart';
 
 class ChatService {
-    Future<ChatAnswer> ask(
+  Future<ChatAnswer> ask(
     String question, {
     List<String> guideIds = const [],
   }) async {
@@ -17,7 +17,9 @@ class ChatService {
     ];
 
     final res = await Supabase.instance.client.functions
-        .invoke('guide-chat',       body: {'question': question, 'drafts': drafts, 'guide_ids': guideIds},
+        .invoke(
+          'guide-chat',
+          body: {'question': question, 'drafts': drafts, 'guide_ids': guideIds},
         )
         .timeout(const Duration(seconds: 45));
 

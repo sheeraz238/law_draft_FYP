@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         await _auth.signIn(_email.text.trim(), _password.text);
       }
-        } on AuthException catch (e) {
+    } on AuthException catch (e) {
       final m = e.message.toLowerCase();
       setState(
         () => _error = m.contains('invalid login')

@@ -242,7 +242,7 @@ class AppTheme {
         backgroundColor: AppColors.sidebar,
         surfaceTintColor: Colors.transparent,
       ),
-            navigationBarTheme: NavigationBarThemeData(
+      navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.sidebar,
         surfaceTintColor: Colors.transparent,
         indicatorColor: const Color(0xFF3A2D12),
@@ -265,7 +265,7 @@ class AppTheme {
         ),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.hairline, space: 1),
-            dataTableTheme: DataTableThemeData(
+      dataTableTheme: DataTableThemeData(
         headingRowColor: const WidgetStatePropertyAll(AppColors.sidebar),
         headingTextStyle: mono(
           size: 11,

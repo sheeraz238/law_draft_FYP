@@ -86,13 +86,13 @@ class _InheritanceScreenState extends State<InheritanceScreen> {
         children: [
           IconButton(
             icon: const Icon(Icons.remove_circle_outline),
-                        color: AppColors.amber,
+            color: AppColors.amber,
             onPressed: v > 0 ? () => setState(() => _c[key] = v - 1) : null,
           ),
           SizedBox(width: 28, child: Text('$v', textAlign: TextAlign.center)),
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
-                        color: AppColors.amber,
+            color: AppColors.amber,
             onPressed: v < max ? () => setState(() => _c[key] = v + 1) : null,
           ),
         ],
@@ -100,7 +100,7 @@ class _InheritanceScreenState extends State<InheritanceScreen> {
     );
   }
 
-    Widget _group(String title, List<Widget> children) {
+  Widget _group(String title, List<Widget> children) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(

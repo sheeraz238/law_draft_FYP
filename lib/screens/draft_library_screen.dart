@@ -21,7 +21,7 @@ class DraftLibraryScreen extends StatefulWidget {
 }
 
 class _DraftLibraryScreenState extends State<DraftLibraryScreen> {
-    final _categories = DraftService.getCategories();
+  final _categories = DraftService.getCategories();
   String _query = '';
   String _tag = 'All';
 
@@ -193,13 +193,14 @@ class _DraftLibraryScreenState extends State<DraftLibraryScreen> {
     );
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<int>(
       valueListenable: TemplateStore.version,
-      builder: (context, _, __) => _buildBody(context),
+      builder: (context, _, _) => _buildBody(context),
     );
   }
+
   Widget _buildBody(BuildContext context) {
     final ready = <_Item>[];
     final soon = <DraftCategory>[];
