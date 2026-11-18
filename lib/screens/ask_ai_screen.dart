@@ -8,6 +8,8 @@ import '../services/local_search.dart';
 import '../services/schema_service.dart';
 import 'draft_form_screen.dart';
 import 'guide_detail_screen.dart';
+import '../core/app_theme.dart';
+import '../services/voice_input.dart';
 
 class _Msg {
   final bool fromUser;
@@ -42,6 +44,7 @@ class _AskAiScreenState extends State<AskAiScreen> {
   static final List<_Msg> _msgs = [];
   List<LegalGuide> _guides = [];
   bool _sending = false;
+  String _voiceLang = 'ur'; // 'ur' ya 'en'
 
   @override
   void initState() {
@@ -52,6 +55,7 @@ class _AskAiScreenState extends State<AskAiScreen> {
 
   @override
   void dispose() {
+    VoiceInput.cancel();
     _input.dispose();
     _scroll.dispose();
     super.dispose();
@@ -81,6 +85,26 @@ class _AskAiScreenState extends State<AskAiScreen> {
         );
       }
     });
+  }
+
+  Future<void> _toggleVoice() async {
+    if (VoiceInput.listening.value) {
+      await VoiceInput.stop();
+      return;
+    }
+    final err = await VoiceInput.start(
+      lang: _voiceLang,
+      onText: (t) {
+        if (!mounted) return;
+        setState(() {
+          _input.text = t;
+          _input.selection = TextSelection.collapsed(offset: t.length);
+        });
+      },
+    );
+    if (err != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+    }
   }
 
   // Darja 1: foran, bina internet ke
@@ -170,6 +194,7 @@ class _AskAiScreenState extends State<AskAiScreen> {
               'offline). Then you can ask AI to explain, or search the web '
               'yourself. General information only, not legal advice. Please '
               'do not enter real names, CNIC or phone numbers, because the AI '
+              ' Voice input uses your phone\'s own speech recognition service.'
               'button sends your text to an AI service.',
             ),
             if (_guides.isNotEmpty) ...[
@@ -433,6 +458,23 @@ class _AskAiScreenState extends State<AskAiScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: VoiceInput.listening,
+                    builder: (context, on, _) => IconButton(
+                      tooltip: on ? 'Stop' : 'Speak your question',
+                      icon: Icon(
+                        on ? Icons.mic : Icons.mic_none,
+                        color: on ? AppColors.amber : AppColors.muted,
+                      ),
+                      onPressed: _toggleVoice,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => setState(
+                      () => _voiceLang = _voiceLang == 'ur' ? 'en' : 'ur',
+                    ),
+                    child: Text(_voiceLang == 'ur' ? 'UR' : 'EN'),
+                  ),
                   IconButton.filled(
                     onPressed: _send,
                     icon: const Icon(Icons.send),
