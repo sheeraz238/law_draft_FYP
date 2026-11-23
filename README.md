@@ -20,7 +20,8 @@ a weak or no internet connection.
 
 | Dashboard | Draft form | Ask AI |
 |---|---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Draft form](docs/screenshots/draft-form.png) | ![Ask AI](docs/screenshots/ask-ai.png) |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Draft form](docs/screenshots/draft-form.png) | 
+  ![Ask AI](docs/screenshots/ask-ai.png) |
 
 | Property Tax Calculator | Translator |
 |---|---|

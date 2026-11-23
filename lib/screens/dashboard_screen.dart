@@ -5,6 +5,7 @@ import '../models/saved_draft.dart';
 import '../services/draft_history_service.dart';
 import '../services/updates_service.dart';
 import '../widgets/ui_kit.dart';
+import '../core/helplines.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String name;
@@ -289,6 +290,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _emergencyCard() {
+    return _card(
+      'Emergency numbers',
+      Column(
+        children: [
+          for (final h in helplines.where((x) => x.category == 'Emergency'))
+            _row(h.name, 'Tap to dial', () async {
+              final digits = h.number.replaceAll(RegExp(r'[^0-9]'), '');
+              try {
+                await launchUrl(Uri(scheme: 'tel', path: digits));
+              } catch (_) {}
+            }, trail: Icons.call),
+        ],
+      ),
+      action: TextButton(
+        onPressed: () => widget.onGo('Rights & Helplines'),
+        child: const Text('More'),
+      ),
+    );
+  }
+
   Widget _disclaimer() {
     final scheme = Theme.of(context).colorScheme;
     return Card(
@@ -367,7 +389,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [_recentCard(), const SizedBox(height: 8), _sourcesCard()],
         );
         final right = Column(
-          children: [_updatesCard(), const SizedBox(height: 8), _disclaimer()],
+          children: [
+            _updatesCard(),
+            const SizedBox(height: 8),
+            _emergencyCard(),
+            const SizedBox(height: 8),
+            _disclaimer(),
+          ],
         );
         return SingleChildScrollView(
           padding: EdgeInsets.all(wide ? 32 : 16),

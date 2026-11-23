@@ -18,6 +18,7 @@ import '../services/profile_service.dart';
 import '../screens/translator_screen.dart';
 import '../services/template_store.dart';
 import '../screens/reminder_screen.dart';
+import '../screens/rights_screen.dart';
 
 class NavItem {
   final String section;
@@ -31,6 +32,7 @@ const navItems = [
   NavItem('DRAFTING', 'Draft Library', Icons.folder_open_outlined),
   NavItem('DRAFTING', 'My Drafts', Icons.edit_note_outlined),
   NavItem('LEARN', 'Legal Guides', Icons.menu_book_outlined),
+    NavItem('LEARN', 'Rights & Helplines', Icons.health_and_safety_outlined),
   NavItem('RESEARCH', 'Case Laws', Icons.gavel_outlined),
   NavItem('RESEARCH', 'Favorites', Icons.bookmark_border),
   NavItem('TOOLS', 'Calculators', Icons.calculate_outlined),
@@ -98,6 +100,8 @@ class _AppShellState extends State<AppShell> {
         return const HistoryScreen();
       case 'Legal Guides':
         return const GuidesScreen();
+              case 'Rights & Helplines':
+        return const RightsScreen();
       case 'Case Laws':
         return const CaseLawScreen();
       case 'Favorites':
