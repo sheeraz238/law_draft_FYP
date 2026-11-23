@@ -16,7 +16,15 @@ or how to read it in English. Law Draft puts the common drafts, step by step gui
 translation in one app that is free, works on a phone, and keeps working (for guides and drafts) with
 a weak or no internet connection.
 
+## Screenshots
 
+| Dashboard | Draft form | Ask AI |
+|---|---|---|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Draft form](docs/screenshots/draft-form.png) | ![Ask AI](docs/screenshots/ask-ai.png) |
+
+| Property Tax Calculator | Translator |
+|---|---|
+| ![Property Tax Calculator](docs/screenshots/property-tax-calculator.png) | ![Translator](docs/screenshots/translator.png) |
 
 ## Features
 
